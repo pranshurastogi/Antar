@@ -77,7 +77,7 @@ export function DashboardStats({ userId }: DashboardStatsProps) {
             whileHover={{ scale: 1.05, y: -2 }}
             className="h-full"
           >
-            <Card className="overflow-hidden h-full border-2 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+            <Card className="overflow-hidden h-full border-2 bg-gradient-to-br from-white via-blue-50/40 to-purple-50/40 dark:from-slate-900/50 dark:via-blue-950/20 dark:to-purple-950/20 hover:border-blue-400/70 dark:hover:border-blue-600/70 hover:shadow-xl transition-all">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <motion.div

@@ -34,7 +34,7 @@ export function DashboardHeader({ user }: { user: User }) {
   const showBackButton = !isDashboard
 
   return (
-    <header className="flex items-center justify-between pb-4 md:pb-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50 -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8 pt-2">
+    <header className="flex items-center justify-between pb-4 md:pb-6 border-b border-blue-200/50 dark:border-blue-800/50 bg-gradient-to-r from-white/90 via-blue-50/60 to-purple-50/60 dark:from-slate-950/90 dark:via-blue-950/40 dark:to-purple-950/40 backdrop-blur-md sticky top-0 z-50 -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8 pt-2 shadow-sm">
       <div className="flex items-center gap-3 md:gap-6 flex-1 min-w-0">
         {showBackButton && (
           <BackButton className="mr-2" />

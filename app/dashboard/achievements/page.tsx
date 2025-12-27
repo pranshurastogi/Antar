@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { AchievementsGrid } from "@/components/achievements/achievements-grid"
 import { DashboardHeader } from "@/components/dashboard-header"
+import { MobileNav } from "@/components/mobile-nav"
 
 export default async function AchievementsPage() {
   const supabase = await createClient()
@@ -16,7 +17,7 @@ export default async function AchievementsPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-950 dark:via-blue-950/20 dark:to-indigo-950/20 p-3 sm:p-4 md:p-6 lg:p-8 pb-24 sm:pb-28 md:pb-32">
+    <main className="flex min-h-screen flex-col bg-gradient-to-br from-pink-50 via-blue-50 via-purple-50 to-cyan-50 dark:from-slate-950 dark:via-blue-950/30 dark:via-purple-950/30 dark:to-pink-950/30 p-3 sm:p-4 md:p-6 lg:p-8 pb-24 sm:pb-28 md:pb-32">
       <DashboardHeader user={user} />
       
       <div className="mt-6 space-y-6 max-w-7xl mx-auto w-full">
@@ -31,6 +32,8 @@ export default async function AchievementsPage() {
 
         <AchievementsGrid userId={user.id} />
       </div>
+
+      <MobileNav />
     </main>
   )
 }

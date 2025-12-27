@@ -28,7 +28,7 @@ export function XPBar({ userId }: XPBarProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex items-center gap-3 p-3 sm:p-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-pink-950/30 rounded-lg border-2 border-indigo-200 dark:border-indigo-800 shadow-sm"
+      className="flex items-center gap-3 p-3 sm:p-4 bg-gradient-to-r from-blue-100/80 via-purple-100/80 to-pink-100/80 dark:from-blue-950/40 dark:via-purple-950/40 dark:to-pink-950/40 rounded-xl border-2 border-blue-300/50 dark:border-blue-700/50 shadow-lg backdrop-blur-sm"
     >
       <motion.div
         className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-md relative"

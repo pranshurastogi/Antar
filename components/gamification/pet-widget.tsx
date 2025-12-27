@@ -38,7 +38,7 @@ export function PetWidget({ userId }: PetWidgetProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950 dark:via-teal-950 dark:to-cyan-950 border-2 border-emerald-200 dark:border-emerald-800 shadow-lg overflow-hidden relative">
+      <Card className="bg-gradient-to-br from-emerald-100/90 via-teal-100/80 to-cyan-100/90 dark:from-emerald-950/50 dark:via-teal-950/40 dark:to-cyan-950/50 border-2 border-emerald-300/60 dark:border-emerald-700/60 shadow-xl overflow-hidden relative backdrop-blur-sm">
         {/* Decorative background elements */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-300 rounded-full blur-3xl" />

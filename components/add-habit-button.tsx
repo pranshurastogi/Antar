@@ -31,7 +31,7 @@ export function AddHabitButton({ userId }: { userId: string }) {
         >
           <Button
             size="icon"
-            className="h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white border-0"
+            className="h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 ring-4 ring-blue-200/50 dark:ring-blue-900/30"
           >
             <motion.div
               animate={{ rotate: [0, 90, 0] }}
