@@ -89,9 +89,14 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
           particleCount: 200,
           spread: 100,
           origin: { y: 0.5 },
-          colors: ['#6366f1', '#a855f7', '#ec4899', '#10b981', '#f59e0b']
+          colors: ['#3b82f6', '#a855f7', '#ec4899', '#10b981', '#f59e0b']
         })
       }, 100)
+
+      // Trigger celebration event for mobile fun elements
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('celebrate'))
+      }
 
       onClose()
       setMood(null)

@@ -7,6 +7,7 @@ import { getToday } from "@/lib/utils/dates"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { Sparkles } from "lucide-react"
+import { MobileSwipeHint } from "@/components/mobile/fun-elements"
 
 interface HabitListProps {
   userId: string
@@ -65,26 +66,29 @@ export function HabitList({ userId }: HabitListProps) {
   }
 
   return (
-    <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {habits.map((habit, index) => {
-        const isCompletedToday = habit.habit_completions?.some(
-          (comp) => comp.completion_date === today
-        )
-        return (
-          <motion.div
-            key={habit.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05, duration: 0.3 }}
-          >
-            <HabitCard
-              habit={habit}
-              isCompleted={isCompletedToday || false}
-              onToggle={() => toggleHabit(habit.id, isCompletedToday || false)}
-            />
-          </motion.div>
-        )
-      })}
-    </div>
+    <>
+      <MobileSwipeHint />
+      <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {habits.map((habit, index) => {
+          const isCompletedToday = habit.habit_completions?.some(
+            (comp) => comp.completion_date === today
+          )
+          return (
+            <motion.div
+              key={habit.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+            >
+              <HabitCard
+                habit={habit}
+                isCompleted={isCompletedToday || false}
+                onToggle={() => toggleHabit(habit.id, isCompletedToday || false)}
+              />
+            </motion.div>
+          )
+        })}
+      </div>
+    </>
   )
 }

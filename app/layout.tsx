@@ -3,6 +3,8 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { ToasterProvider } from '@/lib/providers/toaster-provider'
+import { Footer } from '@/components/footer'
+import { CelebrationBurst, MobileFunIndicator } from '@/components/mobile/fun-elements'
 import './globals.css'
 
 const inter = Inter({ 
@@ -51,9 +53,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased flex flex-col min-h-screen`}>
         <QueryProvider>
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer />
+          <CelebrationBurst />
+          <MobileFunIndicator />
           <ToasterProvider />
           <Analytics />
         </QueryProvider>
