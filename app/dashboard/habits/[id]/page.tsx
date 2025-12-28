@@ -15,11 +15,26 @@ export default async function HabitDetailPage({
 
   const {
     data: { user },
-    error,
+    error: authError,
   } = await supabase.auth.getUser()
 
-  if (error || !user) {
+  if (authError || !user) {
     redirect("/auth/login")
+  }
+
+  // Verify the habit exists and belongs to the user
+  const { data: habit, error: habitError } = await supabase
+    .from('habits')
+    .select('id, user_id, name')
+    .eq('id', params.id)
+    .eq('user_id', user.id)
+    .single()
+
+  // If habit doesn't exist or doesn't belong to user, redirect to dashboard
+  // (The client component will show a nice error message, but we can also handle it server-side)
+  if (habitError || !habit) {
+    // Still render the page - let the client component handle the error gracefully
+    // This allows for better UX with loading states
   }
 
   const isEditMode = searchParams.edit === "true"

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { HabitFormContent } from "@/components/habits/habit-form"
@@ -14,32 +14,76 @@ export function AddHabitButton({ userId }: { userId: string }) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <motion.div
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-[60] md:z-50"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          animate={{
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1,
             boxShadow: [
-              "0 10px 25px -5px rgba(99, 102, 241, 0.3), 0 0 0 0 rgba(99, 102, 241, 0.4)",
-              "0 10px 25px -5px rgba(99, 102, 241, 0.4), 0 0 0 8px rgba(99, 102, 241, 0)",
-              "0 10px 25px -5px rgba(99, 102, 241, 0.3), 0 0 0 0 rgba(99, 102, 241, 0)",
+              "0 10px 40px -5px rgba(99, 102, 241, 0.4), 0 0 0 0 rgba(99, 102, 241, 0.5)",
+              "0 10px 40px -5px rgba(99, 102, 241, 0.5), 0 0 0 12px rgba(99, 102, 241, 0)",
+              "0 10px 40px -5px rgba(99, 102, 241, 0.4), 0 0 0 0 rgba(99, 102, 241, 0)",
             ],
           }}
           transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
+            opacity: { duration: 0.3 },
+            scale: { duration: 0.3 },
+            boxShadow: {
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
           }}
         >
-          <Button
-            size="icon"
-            className="h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 ring-4 ring-blue-200/50 dark:ring-blue-900/30"
-          >
-            <motion.div
-              animate={{ rotate: [0, 90, 0] }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+          <div className="relative">
+            {/* Animated sparkles around the button */}
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute inset-0 flex items-center justify-center"
+                animate={{
+                  rotate: [0, 360],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  duration: 3 + i,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: i * 0.5,
+                }}
+              >
+                <Sparkles 
+                  className="h-4 w-4 text-yellow-400 opacity-60"
+                  style={{
+                    position: 'absolute',
+                    top: `${Math.cos((i * 2 * Math.PI) / 3) * 30}px`,
+                    left: `${Math.sin((i * 2 * Math.PI) / 3) * 30}px`,
+                  }}
+                />
+              </motion.div>
+            ))}
+            
+            <Button
+              size="icon"
+              className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full shadow-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-2 border-white/20 dark:border-white/10 backdrop-blur-sm"
             >
-              <Plus className="h-7 w-7 sm:h-8 sm:w-8" />
-            </motion.div>
-          </Button>
+              <motion.div
+                animate={{ 
+                  rotate: [0, 90, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity,
+                  ease: "easeInOut" 
+                }}
+              >
+                <Plus className="h-8 w-8 sm:h-9 sm:w-9 stroke-[3]" />
+              </motion.div>
+            </Button>
+          </div>
         </motion.div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">

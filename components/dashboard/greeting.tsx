@@ -3,7 +3,8 @@
 import { useProfile } from "@/lib/hooks/useProfile"
 import { getTimeBasedGreeting } from "@/lib/utils/dates"
 import { Skeleton } from "@/components/ui/skeleton"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { useEffect, useState } from "react"
 
 interface DashboardGreetingProps {
   userId: string
@@ -15,18 +16,39 @@ const motivationalMessages = [
   "Consistency is the key. Keep going! ✨",
   "Every completion is a victory. Celebrate the journey! 🎉",
   "Your future self will thank you. Keep building! 🌱",
+  "Progress, not perfection. You're doing great! 🌟",
+  "Each day is a fresh start. Make it count! 🚀",
+  "You're stronger than you think. Keep pushing! 💫",
+  "The best time to start was yesterday. The second best is now! ⚡",
+  "Your consistency will compound. Trust the process! 📈",
 ]
 
 export function DashboardGreeting({ userId }: DashboardGreetingProps) {
   const { data: profile, isLoading } = useProfile(userId)
   const greeting = getTimeBasedGreeting()
-  const message = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+  const [displayName, setDisplayName] = useState<string>('Friend')
+
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.full_name || profile.username || 'Friend')
+    }
+  }, [profile])
+
+  // Cycle through messages every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prev) => (prev + 1) % motivationalMessages.length)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   if (isLoading) {
     return <Skeleton className="h-20 w-full rounded-lg" />
   }
 
-  const displayName = profile?.full_name || profile?.username || 'Friend'
+  const currentMessage = motivationalMessages[currentMessageIndex]
 
   return (
     <motion.div
@@ -41,16 +63,41 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
       >
-        {greeting}, {displayName} 👋
+        {greeting}, {displayName}{" "}
+        <motion.span
+          animate={{ 
+            rotate: [0, 14, -8, 14, -8, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ 
+            duration: 0.5,
+            delay: 0.5,
+            repeat: Infinity,
+            repeatDelay: 2
+          }}
+          className="inline-block"
+        >
+          👋
+        </motion.span>
       </motion.h1>
-      <motion.p
-        className="text-sm sm:text-base md:text-lg text-muted-foreground"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-      >
-        {message}
-      </motion.p>
+      
+      <div className="relative h-8 sm:h-10 md:h-12 overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={currentMessageIndex}
+            className="text-sm sm:text-base md:text-lg text-muted-foreground absolute inset-0"
+            initial={{ opacity: 0, y: 20, x: -10 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: -20, x: 10 }}
+            transition={{ 
+              duration: 0.5,
+              ease: "easeInOut"
+            }}
+          >
+            {currentMessage}
+          </motion.p>
+        </AnimatePresence>
+      </div>
     </motion.div>
   )
 }

@@ -216,8 +216,29 @@ export default function OnboardingPage() {
                     <div className="text-center p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 rounded-lg">
                       <div className="text-6xl mb-4">🌱</div>
                       <h3 className="text-xl font-bold mb-2">The Antar Philosophy</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                         Antar is Sanskrit for "within" or "inner". This app is not just about tracking habits—it's about discovering yourself through consistent practice. Every habit is a mirror reflecting your commitment to growth.
+                      </p>
+                      
+                      {/* Tutorial Video */}
+                      <motion.div
+                        className="mt-4 rounded-lg overflow-hidden border-2 border-indigo-200 dark:border-indigo-800 shadow-lg"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <video
+                          src="/seed-video.mp4"
+                          controls
+                          className="w-full h-auto max-h-[300px] object-cover"
+                          poster="/logo-antar.png"
+                          preload="metadata"
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      </motion.div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Watch this quick tutorial to get started
                       </p>
                     </div>
                     <div className="space-y-2 text-sm">

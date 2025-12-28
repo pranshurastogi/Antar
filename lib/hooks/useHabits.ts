@@ -29,26 +29,83 @@ export function useHabits(userId: string) {
   })
 }
 
-export function useHabit(habitId: string) {
+export function useHabit(habitId: string, userId?: string) {
   return useQuery({
-    queryKey: ['habit', habitId],
+    queryKey: ['habit', habitId, userId],
     queryFn: async () => {
       const supabase = createClient()
 
-      const { data, error } = await supabase
+      if (!userId) {
+        console.error('useHabit: userId is required for security')
+        return null
+      }
+
+      // Strategy: Fetch habit first, then relations separately for better error handling
+      // This ensures we can handle cases where relations might not exist
+      
+      // Step 1: Fetch the habit
+      const { data: habitData, error: habitError } = await supabase
         .from('habits')
-        .select(`
-          *,
-          habit_completions(*),
-          habit_streaks(*)
-        `)
+        .select('*')
         .eq('id', habitId)
+        .eq('user_id', userId)
         .single()
 
-      if (error) throw error
-      return data as HabitWithRelations
+      if (habitError) {
+        if (habitError.code === 'PGRST116') {
+          console.warn('Habit not found:', { habitId, userId, error: habitError.message })
+          return null
+        }
+        console.error('Error fetching habit:', { habitId, userId, error: habitError })
+        throw habitError
+      }
+
+      if (!habitData) {
+        console.warn('No habit data returned:', { habitId, userId })
+        return null
+      }
+
+      // Step 2: Fetch relations in parallel
+      const [completionsResult, streaksResult] = await Promise.all([
+        supabase
+          .from('habit_completions')
+          .select('*')
+          .eq('habit_id', habitId)
+          .eq('user_id', userId)
+          .order('completion_date', { ascending: false }),
+        supabase
+          .from('habit_streaks')
+          .select('*')
+          .eq('habit_id', habitId)
+          .eq('user_id', userId)
+          .maybeSingle() // Use maybeSingle since streak might not exist yet
+      ])
+
+      // Handle errors in relations (non-critical, can continue without them)
+      if (completionsResult.error) {
+        console.warn('Error fetching completions (non-critical):', completionsResult.error)
+      }
+      if (streaksResult.error && streaksResult.error.code !== 'PGRST116') {
+        console.warn('Error fetching streaks (non-critical):', streaksResult.error)
+      }
+
+      // Combine the data
+      const result: HabitWithRelations = {
+        ...habitData,
+        habit_completions: completionsResult.data || [],
+        habit_streaks: streaksResult.data || undefined,
+      }
+
+      return result
     },
-    enabled: !!habitId,
+    enabled: !!habitId && !!userId,
+    retry: (failureCount, error: any) => {
+      // Don't retry if it's a "not found" error
+      if (error?.code === 'PGRST116') {
+        return false
+      }
+      return failureCount < 2
+    },
   })
 }
 
