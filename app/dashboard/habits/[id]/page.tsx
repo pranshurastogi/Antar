@@ -8,10 +8,14 @@ export default async function HabitDetailPage({
   params,
   searchParams,
 }: {
-  params: { id: string }
-  searchParams: { edit?: string }
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ edit?: string }>
 }) {
   const supabase = await createClient()
+  
+  // Await params and searchParams (Next.js 15 requirement)
+  const { id } = await params
+  const resolvedSearchParams = await searchParams
 
   const {
     data: { user },
@@ -26,7 +30,7 @@ export default async function HabitDetailPage({
   const { data: habit, error: habitError } = await supabase
     .from('habits')
     .select('id, user_id, name')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
     .single()
 
@@ -37,14 +41,14 @@ export default async function HabitDetailPage({
     // This allows for better UX with loading states
   }
 
-  const isEditMode = searchParams.edit === "true"
+  const isEditMode = resolvedSearchParams.edit === "true"
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-950 dark:via-blue-950/20 dark:to-indigo-950/20 p-3 sm:p-4 md:p-6 lg:p-8 pb-24 sm:pb-28 md:pb-32">
       <DashboardHeader user={user} />
       
       <div className="mt-6 max-w-4xl mx-auto w-full">
-        <HabitDetailView habitId={params.id} userId={user.id} isEditMode={isEditMode} />
+        <HabitDetailView habitId={id} userId={user.id} isEditMode={isEditMode} />
       </div>
 
       <MobileNav />
