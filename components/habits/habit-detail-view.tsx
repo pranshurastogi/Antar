@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Flame, Calendar, Target, TrendingUp, Clock, Zap, ArrowLeft, CheckCircle2, Trophy, Star, Sparkles } from "lucide-react"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Flame, Calendar, Target, TrendingUp, Clock, Zap, ArrowLeft, CheckCircle2, Trophy, Star, Sparkles, Edit } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { formatDate } from "@/lib/utils/dates"
 import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
+import { HabitFormContent } from "@/components/habits/habit-form"
 
 interface HabitDetailViewProps {
   habitId: string
@@ -30,6 +32,11 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
   const router = useRouter()
   const { data: habit, isLoading, error } = useHabit(habitId, userId)
   const [quoteIndex, setQuoteIndex] = useState(0)
+  const [showEditDialog, setShowEditDialog] = useState(isEditMode)
+
+  useEffect(() => {
+    setShowEditDialog(isEditMode)
+  }, [isEditMode])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -37,6 +44,9 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
     }, 4000)
     return () => clearInterval(interval)
   }, [])
+
+  // Show edit dialog when in edit mode
+  // We render it alongside the detail view so the dialog can overlay
 
   if (isLoading) {
     return (
@@ -124,12 +134,48 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
   const isConsistent = completionRate >= 80
 
   return (
-    <motion.div 
-      className="space-y-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
+    <>
+      {/* Edit Dialog */}
+      {habit && (
+        <Dialog open={showEditDialog} onOpenChange={(open) => {
+          setShowEditDialog(open)
+          if (!open) {
+            // Remove edit mode from URL when closing
+            router.push(`/dashboard/habits/${habitId}`)
+          }
+        }}>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <HabitFormContent
+              userId={userId}
+              habitId={habitId}
+              isEditMode={true}
+              initialData={{
+                name: habit.name,
+                description: habit.description || undefined,
+                category: habit.category as any,
+                color: habit.color,
+                icon: habit.icon,
+                frequency_type: habit.frequency_type as any,
+                frequency_config: habit.frequency_config as any,
+                preferred_time: habit.preferred_time || undefined,
+                estimated_duration: habit.estimated_duration || undefined,
+                difficulty_level: habit.difficulty_level as any,
+              }}
+              onSuccess={() => {
+                setShowEditDialog(false)
+                router.push(`/dashboard/habits/${habitId}`)
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <motion.div 
+        className="space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -160,6 +206,18 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
             {habit.description || "No description"}
           </motion.p>
         </div>
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setShowEditDialog(true)
+              router.push(`/dashboard/habits/${habitId}?edit=true`)
+            }}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        </motion.div>
       </motion.div>
 
       {/* Motivational Quote Banner */}
@@ -537,6 +595,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
         )}
       </motion.div>
     </motion.div>
+    </>
   )
 }
 

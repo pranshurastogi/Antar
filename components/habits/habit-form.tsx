@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
-import { useCreateHabit } from "@/lib/hooks/useHabits"
+import { useCreateHabit, useUpdateHabit } from "@/lib/hooks/useHabits"
 import { getXpForDifficulty } from "@/lib/utils/xp"
 import { toast } from "react-hot-toast"
 
@@ -46,11 +46,16 @@ interface HabitFormContentProps {
   userId: string
   onSuccess?: () => void
   initialData?: Partial<HabitFormData>
+  habitId?: string // For edit mode
+  isEditMode?: boolean
 }
 
-export function HabitFormContent({ userId, onSuccess, initialData }: HabitFormContentProps) {
+export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEditMode = false }: HabitFormContentProps) {
   const createHabit = useCreateHabit()
-  const [selectedDays, setSelectedDays] = useState<number[]>([])
+  const updateHabit = useUpdateHabit()
+  const [selectedDays, setSelectedDays] = useState<number[]>(
+    (initialData?.frequency_config as any)?.days || []
+  )
   const [selectedCategory, setSelectedCategory] = useState(initialData?.category || 'health')
   const [selectedDifficulty, setSelectedDifficulty] = useState(initialData?.difficulty_level || 'medium')
   const [duration, setDuration] = useState([initialData?.estimated_duration || 30])
@@ -60,50 +65,92 @@ export function HabitFormContent({ userId, onSuccess, initialData }: HabitFormCo
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<HabitFormData>({
     resolver: zodResolver(habitSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
-      category: selectedCategory,
-      color: categoryData?.color || '#6366f1',
-      icon: categoryData?.icon || '✨',
+      category: initialData?.category || 'health',
+      color: initialData?.color || categoryData?.color || '#6366f1',
+      icon: initialData?.icon || categoryData?.icon || '✨',
       frequency_type: initialData?.frequency_type || 'daily',
-      difficulty_level: selectedDifficulty,
-      estimated_duration: duration[0],
+      difficulty_level: initialData?.difficulty_level || 'medium',
+      estimated_duration: initialData?.estimated_duration || 30,
+      preferred_time: initialData?.preferred_time || undefined,
     },
   })
 
+  // Watch category to update icon and color when it changes
+  const watchedCategory = watch('category')
+
+  // Update icon and color when category changes
+  useEffect(() => {
+    const newCategoryData = CATEGORY_OPTIONS.find(c => c.value === selectedCategory)
+    if (newCategoryData) {
+      setValue('category', selectedCategory as any)
+      setValue('color', newCategoryData.color)
+      setValue('icon', newCategoryData.icon)
+    }
+  }, [selectedCategory, setValue])
+
   const onSubmit = async (data: HabitFormData) => {
     try {
+      // Ensure we use the selected category, icon, and color (in case form state is out of sync)
+      const finalCategory = selectedCategory || data.category
+      const categoryInfo = CATEGORY_OPTIONS.find(c => c.value === finalCategory)
+      const finalData = {
+        ...data,
+        category: finalCategory as any,
+        icon: categoryInfo?.icon || data.icon,
+        color: categoryInfo?.color || data.color,
+      }
+
       // Build frequency config based on type (must be JSONB)
       let frequencyConfig: Record<string, any> = {}
-      if (data.frequency_type === 'specific_days') {
+      if (finalData.frequency_type === 'specific_days') {
         frequencyConfig = { days: selectedDays }
-      } else if (data.frequency_type === 'daily') {
+      } else if (finalData.frequency_type === 'daily') {
         frequencyConfig = {}
       }
 
-      await createHabit.mutateAsync({
-        ...data,
-        user_id: userId,
-        frequency_config: frequencyConfig, // JSONB field
-        preferred_time: data.preferred_time || null,
-        time_flexibility: 60, // Default from schema
-        estimated_duration: duration[0] || null,
-        xp_value: getXpForDifficulty(data.difficulty_level),
-        is_archived: false,
-        is_template: false,
-        template_name: null,
-        stack_order: null,
-        depends_on: null,
-      })
-
-      toast.success('Habit created successfully! 🎉')
+      if (isEditMode && habitId) {
+        // Update existing habit
+        await updateHabit.mutateAsync({
+          id: habitId,
+          updates: {
+            ...finalData,
+            frequency_config: frequencyConfig,
+            preferred_time: finalData.preferred_time || null,
+            estimated_duration: duration[0] || null,
+            xp_value: getXpForDifficulty(finalData.difficulty_level),
+          },
+        })
+        toast.success('Habit updated successfully! 🎉')
+      } else {
+        // Create new habit
+        await createHabit.mutateAsync({
+          ...finalData,
+          user_id: userId,
+          frequency_config: frequencyConfig, // JSONB field
+          preferred_time: finalData.preferred_time || null,
+          time_flexibility: 60, // Default from schema
+          estimated_duration: duration[0] || null,
+          xp_value: getXpForDifficulty(finalData.difficulty_level),
+          is_archived: false,
+          is_template: false,
+          template_name: null,
+          stack_order: null,
+          depends_on: null,
+        })
+        toast.success('Habit created successfully! 🎉')
+      }
+      
       onSuccess?.()
     } catch (error) {
-      toast.error('Failed to create habit')
+      toast.error(isEditMode ? 'Failed to update habit' : 'Failed to create habit')
     }
   }
 
@@ -116,9 +163,9 @@ export function HabitFormContent({ userId, onSuccess, initialData }: HabitFormCo
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <DialogHeader>
-        <DialogTitle>Create New Habit</DialogTitle>
+        <DialogTitle>{isEditMode ? 'Edit Habit' : 'Create New Habit'}</DialogTitle>
         <DialogDescription>
-          Build a habit that aligns with your goals and values
+          {isEditMode ? 'Update your habit details' : 'Build a habit that aligns with your goals and values'}
         </DialogDescription>
       </DialogHeader>
 
@@ -153,7 +200,12 @@ export function HabitFormContent({ userId, onSuccess, initialData }: HabitFormCo
             <button
               key={cat.value}
               type="button"
-              onClick={() => setSelectedCategory(cat.value as any)}
+              onClick={() => {
+                setSelectedCategory(cat.value as any)
+                setValue('category', cat.value as any)
+                setValue('color', cat.color)
+                setValue('icon', cat.icon)
+              }}
               className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
                 selectedCategory === cat.value
                   ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950'
@@ -263,9 +315,12 @@ export function HabitFormContent({ userId, onSuccess, initialData }: HabitFormCo
       <Button
         type="submit"
         className="w-full bg-indigo-600 hover:bg-indigo-700"
-        disabled={createHabit.isPending}
+        disabled={isEditMode ? updateHabit.isPending : createHabit.isPending}
       >
-        {createHabit.isPending ? 'Creating...' : 'Create Habit'}
+        {isEditMode 
+          ? (updateHabit.isPending ? 'Updating...' : 'Update Habit')
+          : (createHabit.isPending ? 'Creating...' : 'Create Habit')
+        }
       </Button>
     </form>
   )
