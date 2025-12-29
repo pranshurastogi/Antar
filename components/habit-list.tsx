@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { Sparkles } from "lucide-react"
 import { MobileSwipeHint } from "@/components/mobile/fun-elements"
+import { CompactLoader } from "@/components/ui/fun-loader"
 
 interface HabitListProps {
   userId: string
@@ -33,10 +34,8 @@ export function HabitList({ userId }: HabitListProps) {
 
   if (isLoading) {
     return (
-      <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Skeleton key={i} className="h-28 sm:h-32 w-full rounded-xl" />
-        ))}
+      <div className="mt-4 flex items-center justify-center py-12">
+        <CompactLoader />
       </div>
     )
   }

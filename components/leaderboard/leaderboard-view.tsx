@@ -6,8 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trophy, TrendingUp, Flame, Target, Award, Crown } from "lucide-react"
+import { FunLoader, SkeletonLoader } from "@/components/ui/fun-loader"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Icons } from "@/lib/icons"
 import { motion } from "framer-motion"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   useAllTimeLeaderboard,
   usePeriodLeaderboard,
@@ -59,7 +62,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
       <Card className="border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-yellow-500" />
+            <FontAwesomeIcon icon={Icons.crown} className="h-5 w-5 text-yellow-500" />
             Your Rank
           </CardTitle>
           <CardDescription>See how you stack up against others</CardDescription>
@@ -103,7 +106,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-6 w-6 text-yellow-500" />
+            <FontAwesomeIcon icon={Icons.trophy} className="h-6 w-6 text-yellow-500" />
             Leaderboard
           </CardTitle>
           <CardDescription>
@@ -162,7 +165,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-purple-500" />
+            <FontAwesomeIcon icon={Icons.medal} className="h-5 w-5 text-purple-500" />
             How Scoring Works
           </CardTitle>
         </CardHeader>
@@ -170,7 +173,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
           {period === "all-time" ? (
             <>
               <div className="flex items-start gap-3">
-                <TrendingUp className="h-5 w-5 mt-0.5 text-blue-500" />
+                <FontAwesomeIcon icon={Icons.arrowTrendUp} className="h-5 w-5 mt-0.5 text-blue-500" />
                 <div>
                   <p className="font-medium">Total XP (30%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -179,7 +182,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Flame className="h-5 w-5 mt-0.5 text-orange-500" />
+                <FontAwesomeIcon icon={Icons.fire} className="h-5 w-5 mt-0.5 text-orange-500" />
                 <div>
                   <p className="font-medium">Streaks (30%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -188,7 +191,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Target className="h-5 w-5 mt-0.5 text-green-500" />
+                <FontAwesomeIcon icon={Icons.target} className="h-5 w-5 mt-0.5 text-green-500" />
                 <div>
                   <p className="font-medium">Completion Rate (20%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -197,7 +200,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Trophy className="h-5 w-5 mt-0.5 text-yellow-500" />
+                <FontAwesomeIcon icon={Icons.trophy} className="h-5 w-5 mt-0.5 text-yellow-500" />
                 <div>
                   <p className="font-medium">Achievements (10%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -209,7 +212,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
           ) : (
             <>
               <div className="flex items-start gap-3">
-                <TrendingUp className="h-5 w-5 mt-0.5 text-blue-500" />
+                <FontAwesomeIcon icon={Icons.arrowTrendUp} className="h-5 w-5 mt-0.5 text-blue-500" />
                 <div>
                   <p className="font-medium">XP Earned (45%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -218,7 +221,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Target className="h-5 w-5 mt-0.5 text-green-500" />
+                <FontAwesomeIcon icon={Icons.target} className="h-5 w-5 mt-0.5 text-green-500" />
                 <div>
                   <p className="font-medium">Completions (30%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -227,7 +230,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Trophy className="h-5 w-5 mt-0.5 text-yellow-500" />
+                <FontAwesomeIcon icon={Icons.trophy} className="h-5 w-5 mt-0.5 text-yellow-500" />
                 <div>
                   <p className="font-medium">Completion Rate (15%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -236,7 +239,7 @@ export function LeaderboardView({ userId }: LeaderboardViewProps) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Flame className="h-5 w-5 mt-0.5 text-orange-500" />
+                <FontAwesomeIcon icon={Icons.fire} className="h-5 w-5 mt-0.5 text-orange-500" />
                 <div>
                   <p className="font-medium">Best Streak (10%)</p>
                   <p className="text-sm text-muted-foreground">
@@ -261,19 +264,13 @@ interface LeaderboardListProps {
 
 function LeaderboardList({ data, isLoading, period, currentUserId }: LeaderboardListProps) {
   if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[...Array(10)].map((_, i) => (
-          <Skeleton key={i} className="h-20 w-full" />
-        ))}
-      </div>
-    )
+    return <SkeletonLoader count={10} />
   }
 
   if (!data || data.length === 0) {
     return (
       <div className="py-12 text-center">
-        <Trophy className="mx-auto h-12 w-12 text-muted-foreground/50" />
+        <FontAwesomeIcon icon={Icons.trophy} className="mx-auto h-12 w-12 text-muted-foreground/50" />
         <p className="mt-4 text-muted-foreground">
           No one on the leaderboard yet. Be the first!
         </p>
@@ -329,22 +326,22 @@ function LeaderboardList({ data, isLoading, period, currentUserId }: Leaderboard
                   {period === "all-time" ? (
                     <>
                       <span className="flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
+                        <FontAwesomeIcon icon={Icons.arrowTrendUp} className="h-3 w-3" />
                         {entry.total_xp} XP
                       </span>
                       <span className="flex items-center gap-1">
-                        <Flame className="h-3 w-3" />
+                        <FontAwesomeIcon icon={Icons.fire} className="h-3 w-3" />
                         {entry.current_streak} day streak
                       </span>
                     </>
                   ) : (
                     <>
                       <span className="flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
+                        <FontAwesomeIcon icon={Icons.arrowTrendUp} className="h-3 w-3" />
                         {entry.xp_earned} XP
                       </span>
                       <span className="flex items-center gap-1">
-                        <Target className="h-3 w-3" />
+                        <FontAwesomeIcon icon={Icons.target} className="h-3 w-3" />
                         {entry.completions} completed
                       </span>
                     </>

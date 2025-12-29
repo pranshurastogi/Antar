@@ -4,84 +4,85 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Vibrant Pastel Theme - Light */
-  --background: oklch(0.98 0.01 100);
-  --foreground: oklch(0.2 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 250);
-  /* Primary: Vibrant Pastel Blue */
-  --primary: oklch(0.65 0.15 250);
-  --primary-foreground: oklch(0.98 0 0);
-  /* Secondary: Soft Pastel Pink */
-  --secondary: oklch(0.9 0.08 350);
-  --secondary-foreground: oklch(0.4 0.1 350);
-  --muted: oklch(0.95 0.02 100);
-  --muted-foreground: oklch(0.5 0.02 250);
-  /* Accent: Energetic Pastel Purple */
-  --accent: oklch(0.7 0.12 300);
-  --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.6 0.2 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.88 0.02 100);
-  --input: oklch(0.96 0.01 100);
-  --ring: oklch(0.65 0.15 250);
-  /* Vibrant Pastel Chart Colors */
-  --chart-1: oklch(0.7 0.15 250); /* Sky Blue */
-  --chart-2: oklch(0.75 0.12 300); /* Lavender */
-  --chart-3: oklch(0.72 0.15 150); /* Mint */
-  --chart-4: oklch(0.78 0.15 50); /* Peach */
-  --chart-5: oklch(0.75 0.15 20); /* Coral */
-  --radius: 1rem;
-  --sidebar: oklch(0.97 0.01 100);
-  --sidebar-foreground: oklch(0.2 0.02 250);
-  --sidebar-primary: oklch(0.65 0.15 250);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.92 0.05 350);
-  --sidebar-accent-foreground: oklch(0.4 0.1 350);
-  --sidebar-border: oklch(0.88 0.02 100);
-  --sidebar-ring: oklch(0.65 0.15 250);
+  /* Coolors Theme - Light (#26547C, #EF476F, #FFD166, #06D6A0, #FCFCFC) */
+  --background: 252 252 252; /* #FCFCFC - White */
+  --foreground: 38 84 124; /* #26547C - Dusk Blue */
+  --card: 255 255 255;
+  --card-foreground: 38 84 124;
+  --popover: 255 255 255;
+  --popover-foreground: 38 84 124;
+  /* Primary: Dusk Blue #26547C */
+  --primary: 38 84 124;
+  --primary-foreground: 252 252 252;
+  /* Secondary: Teal #06D6A0 */
+  --secondary: 6 214 160;
+  --secondary-foreground: 38 84 124;
+  --muted: 240 244 248;
+  --muted-foreground: 71 85 105;
+  /* Accent: Pink #EF476F */
+  --accent: 239 71 111;
+  --accent-foreground: 252 252 252;
+  /* Destructive: Pink variant */
+  --destructive: 239 68 68;
+  --destructive-foreground: 252 252 252;
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --ring: 38 84 124;
+  /* Chart Colors from Coolors Palette */
+  --chart-1: 38 84 124; /* Dusk Blue */
+  --chart-2: 239 71 111; /* Pink */
+  --chart-3: 255 209 102; /* Yellow */
+  --chart-4: 6 214 160; /* Teal */
+  --chart-5: 147 197 253; /* Light Blue */
+  --radius: 0.75rem;
+  --sidebar: 248 250 252;
+  --sidebar-foreground: 38 84 124;
+  --sidebar-primary: 38 84 124;
+  --sidebar-primary-foreground: 252 252 252;
+  --sidebar-accent: 6 214 160;
+  --sidebar-accent-foreground: 38 84 124;
+  --sidebar-border: 226 232 240;
+  --sidebar-ring: 38 84 124;
 }
 
 .dark {
-  /* Vibrant Pastel Theme - Dark */
-  --background: oklch(0.15 0.02 250);
-  --foreground: oklch(0.95 0.01 100);
-  --card: oklch(0.18 0.02 250);
-  --card-foreground: oklch(0.95 0.01 100);
-  --popover: oklch(0.18 0.02 250);
-  --popover-foreground: oklch(0.95 0.01 100);
-  /* Primary: Bright Pastel Blue */
-  --primary: oklch(0.75 0.15 250);
-  --primary-foreground: oklch(0.15 0.02 250);
-  /* Secondary: Soft Pastel Pink */
-  --secondary: oklch(0.3 0.08 350);
-  --secondary-foreground: oklch(0.9 0.08 350);
-  --muted: oklch(0.22 0.02 250);
-  --muted-foreground: oklch(0.7 0.02 250);
-  /* Accent: Vibrant Pastel Purple */
-  --accent: oklch(0.75 0.12 300);
-  --accent-foreground: oklch(0.15 0.02 250);
-  --destructive: oklch(0.65 0.2 25);
-  --destructive-foreground: oklch(0.95 0.01 100);
-  --border: oklch(0.25 0.02 250);
-  --input: oklch(0.2 0.02 250);
-  --ring: oklch(0.75 0.15 250);
-  /* Vibrant Pastel Chart Colors - Dark */
-  --chart-1: oklch(0.75 0.15 250); /* Sky Blue */
-  --chart-2: oklch(0.8 0.12 300); /* Lavender */
-  --chart-3: oklch(0.77 0.15 150); /* Mint */
-  --chart-4: oklch(0.83 0.15 50); /* Peach */
-  --chart-5: oklch(0.8 0.15 20); /* Coral */
-  --sidebar: oklch(0.2 0.02 250);
-  --sidebar-foreground: oklch(0.95 0.01 100);
-  --sidebar-primary: oklch(0.75 0.15 250);
-  --sidebar-primary-foreground: oklch(0.15 0.02 250);
-  --sidebar-accent: oklch(0.28 0.05 350);
-  --sidebar-accent-foreground: oklch(0.9 0.08 350);
-  --sidebar-border: oklch(0.25 0.02 250);
-  --sidebar-ring: oklch(0.75 0.15 250);
+  /* Coolors Theme - Dark */
+  --background: 15 23 42; /* Dark slate */
+  --foreground: 252 252 252;
+  --card: 30 41 59;
+  --card-foreground: 252 252 252;
+  --popover: 30 41 59;
+  --popover-foreground: 252 252 252;
+  /* Primary: Lighter Dusk Blue for dark mode */
+  --primary: 96 165 250;
+  --primary-foreground: 15 23 42;
+  /* Secondary: Teal */
+  --secondary: 6 214 160;
+  --secondary-foreground: 15 23 42;
+  --muted: 51 65 85;
+  --muted-foreground: 148 163 184;
+  /* Accent: Pink */
+  --accent: 251 113 133;
+  --accent-foreground: 252 252 252;
+  --destructive: 239 68 68;
+  --destructive-foreground: 252 252 252;
+  --border: 51 65 85;
+  --input: 51 65 85;
+  --ring: 96 165 250;
+  /* Chart Colors - Dark Mode */
+  --chart-1: 96 165 250; /* Light Blue */
+  --chart-2: 251 113 133; /* Pink */
+  --chart-3: 253 224 71; /* Yellow */
+  --chart-4: 52 211 153; /* Teal */
+  --chart-5: 167 139 250; /* Purple */
+  --sidebar: 30 41 59;
+  --sidebar-foreground: 252 252 252;
+  --sidebar-primary: 96 165 250;
+  --sidebar-primary-foreground: 15 23 42;
+  --sidebar-accent: 6 214 160;
+  --sidebar-accent-foreground: 15 23 42;
+  --sidebar-border: 51 65 85;
+  --sidebar-ring: 96 165 250;
 }
 
 @theme inline {

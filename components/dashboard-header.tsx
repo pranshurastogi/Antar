@@ -14,7 +14,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
-import { BarChart3, Trophy, BookTemplate, Home, Crown, Settings } from "lucide-react"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Icons } from "@/lib/icons"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { BackButton } from "@/components/ui/back-button"
@@ -65,7 +66,7 @@ export function DashboardHeader({ user }: { user: User }) {
               size="sm"
               className="text-sm font-medium"
             >
-              <Home className="h-4 w-4 mr-2" />
+              <FontAwesomeIcon icon={Icons.home} className="h-4 w-4 mr-2" />
               Dashboard
             </Button>
           </Link>
@@ -75,7 +76,7 @@ export function DashboardHeader({ user }: { user: User }) {
               size="sm"
               className="text-sm font-medium"
             >
-              <BarChart3 className="h-4 w-4 mr-2" />
+              <FontAwesomeIcon icon={Icons.chartLine} className="h-4 w-4 mr-2" />
               Analytics
             </Button>
           </Link>
@@ -85,7 +86,7 @@ export function DashboardHeader({ user }: { user: User }) {
               size="sm"
               className="text-sm font-medium"
             >
-              <Trophy className="h-4 w-4 mr-2" />
+              <FontAwesomeIcon icon={Icons.trophy} className="h-4 w-4 mr-2" />
               Achievements
             </Button>
           </Link>
@@ -95,7 +96,7 @@ export function DashboardHeader({ user }: { user: User }) {
               size="sm"
               className="text-sm font-medium"
             >
-              <Crown className="h-4 w-4 mr-2" />
+              <FontAwesomeIcon icon={Icons.crown} className="h-4 w-4 mr-2 text-yellow-500" />
               Leaderboard
             </Button>
           </Link>
@@ -115,16 +116,19 @@ export function DashboardHeader({ user }: { user: User }) {
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link href="/dashboard/templates" className="flex items-center cursor-pointer">
-              <BookTemplate className="h-4 w-4 mr-2" />
+              <FontAwesomeIcon icon={Icons.templates} className="h-4 w-4 mr-2" />
               Templates
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Settings className="h-4 w-4 mr-2" />
+            <FontAwesomeIcon icon={Icons.gear} className="h-4 w-4 mr-2" />
             Settings
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSignOut}>
+            <FontAwesomeIcon icon={Icons.signOut} className="h-4 w-4 mr-2" />
+            Sign out
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

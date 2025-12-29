@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts'
 import { subDays, format, parseISO, getHours } from "date-fns"
 import { TrendingUp, Target, Calendar, Zap } from "lucide-react"
+import { FunLoader } from "@/components/ui/fun-loader"
 
 interface AnalyticsDashboardProps {
   userId: string
@@ -27,13 +28,7 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
   const { data: habits, isLoading: habitsLoading } = useHabits(userId)
 
   if (completionsLoading || habitsLoading) {
-    return (
-      <div className="space-y-6">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-64 w-full" />
-        ))}
-      </div>
-    )
+    return <FunLoader message="Analyzing your progress..." size="md" />
   }
 
   // Overview metrics

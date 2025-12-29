@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreVertical, Flame, CheckCircle2, Clock, Target, TrendingUp, Calendar } from "lucide-react"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Icons } from "@/lib/icons"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { CompletionModal } from "@/components/habits/completion-modal"
 import { cn } from "@/lib/utils"
@@ -68,10 +69,10 @@ export function HabitCard({ habit, isCompleted, onToggle }: HabitCardProps) {
       >
         <Card
           className={cn(
-            "transition-all duration-300 relative overflow-hidden border-2",
-            isCompleted && "bg-gradient-to-br from-emerald-100/80 via-green-100/60 to-teal-100/80 dark:from-emerald-950/40 dark:via-green-950/30 dark:to-teal-950/40 border-emerald-300/50 dark:border-emerald-700/50 shadow-lg",
-            !isCompleted && isOverdue && "border-orange-300/50 dark:border-orange-700/50 bg-gradient-to-br from-orange-50/60 to-amber-50/60 dark:from-orange-950/30 dark:to-amber-950/30",
-            !isCompleted && !isOverdue && "bg-gradient-to-br from-white via-blue-50/40 to-purple-50/40 dark:from-slate-900/50 dark:via-blue-950/20 dark:to-purple-950/20 border-blue-200/50 dark:border-blue-800/50 hover:border-blue-400/70 dark:hover:border-blue-600/70 hover:shadow-xl"
+            "transition-all duration-300 relative overflow-hidden border-2 bg-white dark:bg-slate-900",
+            isCompleted && "bg-gradient-to-br from-[#06D6A0]/20 via-[#06D6A0]/10 to-[#06D6A0]/5 dark:from-[#06D6A0]/30 dark:via-[#06D6A0]/20 dark:to-[#06D6A0]/10 border-[#06D6A0] dark:border-[#06D6A0]/70 shadow-lg",
+            !isCompleted && isOverdue && "border-[#FFD166] dark:border-[#FFD166]/70 bg-gradient-to-br from-[#FFD166]/10 to-[#FFD166]/5 dark:from-[#FFD166]/20 dark:to-[#FFD166]/10",
+            !isCompleted && !isOverdue && "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-[#26547C] dark:hover:border-[#60A5FA] hover:shadow-xl"
           )}
         >
           {/* Completion indicator bar */}
@@ -81,7 +82,7 @@ export function HabitCard({ habit, isCompleted, onToggle }: HabitCardProps) {
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 exit={{ width: 0 }}
-                className="absolute top-0 left-0 h-1 bg-gradient-to-r from-emerald-500 to-green-500"
+                className="absolute top-0 left-0 h-1.5 bg-gradient-to-r from-[#06D6A0] via-[#06D6A0] to-[#06D6A0]"
               />
             )}
           </AnimatePresence>
@@ -122,24 +123,24 @@ export function HabitCard({ habit, isCompleted, onToggle }: HabitCardProps) {
                           animate={{ scale: 1, rotate: 0 }}
                           exit={{ scale: 0, rotate: 180 }}
                         >
-                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <FontAwesomeIcon icon={Icons.circleCheck} className="h-5 w-5 text-[#06D6A0] dark:text-[#34D399] shrink-0" />
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-xs bg-white/60 dark:bg-slate-800/60">
+                    <Badge variant="outline" className="text-xs bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
                       {habit.category}
                     </Badge>
                     {currentStreak > 0 && (
-                      <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 font-semibold">
-                        <Flame className="h-3.5 w-3.5" />
+                      <div className="flex items-center gap-1 text-[#EF476F] dark:text-[#FB7185] font-semibold">
+                        <FontAwesomeIcon icon={Icons.fire} className="h-3.5 w-3.5" />
                         <span className="text-xs sm:text-sm font-mono">{currentStreak}</span>
                       </div>
                     )}
                     {habit.preferred_time && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <FontAwesomeIcon icon={Icons.clock} className="h-3 w-3" />
                         {habit.preferred_time}
                       </span>
                     )}
@@ -156,25 +157,26 @@ export function HabitCard({ habit, isCompleted, onToggle }: HabitCardProps) {
                   <Checkbox
                     checked={isCompleted}
                     onCheckedChange={handleQuickComplete}
-                    className="h-6 w-6 sm:h-7 sm:w-7 rounded-md border-2 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 shadow-sm"
+                    className="h-6 w-6 sm:h-7 sm:w-7 rounded-md border-2 data-[state=checked]:bg-[#06D6A0] data-[state=checked]:border-[#06D6A0] shadow-sm"
                   />
                 </motion.div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
-                      <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <FontAwesomeIcon icon={Icons.ellipsisVertical} className="h-4 w-4 sm:h-5 sm:w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={handleViewDetails}>
-                      <Target className="h-4 w-4 mr-2" />
+                  <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                    <DropdownMenuItem onClick={handleViewDetails} className="bg-white dark:bg-slate-900">
+                      <FontAwesomeIcon icon={Icons.target} className="h-4 w-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleEdit}>
-                      <TrendingUp className="h-4 w-4 mr-2" />
+                    <DropdownMenuItem onClick={handleEdit} className="bg-white dark:bg-slate-900">
+                      <FontAwesomeIcon icon={Icons.edit} className="h-4 w-4 mr-2" />
                       Edit Habit
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleArchive} className="text-orange-600 dark:text-orange-400">
+                    <DropdownMenuItem onClick={handleArchive} className="text-[#EF476F] dark:text-[#FB7185] bg-white dark:bg-slate-900">
+                      <FontAwesomeIcon icon={Icons.archive} className="h-4 w-4 mr-2" />
                       Archive
                     </DropdownMenuItem>
                   </DropdownMenuContent>

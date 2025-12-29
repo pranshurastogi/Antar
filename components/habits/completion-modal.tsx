@@ -9,7 +9,8 @@ import { useCompleteHabit } from "@/lib/hooks/useCompletions"
 import type { Habit } from "@/lib/types/database"
 import confetti from "canvas-confetti"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, Zap } from "lucide-react"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Icons } from "@/lib/icons"
 
 interface CompletionModalProps {
   habit: Habit
@@ -83,13 +84,13 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
         })
       }, 250)
 
-      // Final burst
+      // Final burst with Coolors theme colors
       setTimeout(() => {
         confetti({
           particleCount: 200,
           spread: 100,
           origin: { y: 0.5 },
-          colors: ['#3b82f6', '#a855f7', '#ec4899', '#10b981', '#f59e0b']
+          colors: ['#26547C', '#EF476F', '#FFD166', '#06D6A0', '#FCFCFC']
         })
       }, 100)
 
@@ -109,9 +110,9 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] p-4 sm:p-6 max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#26547C] via-[#EF476F] to-[#06D6A0] bg-clip-text text-transparent">
             Complete Habit ✨
           </DialogTitle>
         </DialogHeader>
@@ -119,7 +120,7 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
         <div className="space-y-5 sm:space-y-6 py-2 sm:py-4">
           {/* Habit Name */}
           <motion.div
-            className="text-center p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border-2 border-indigo-200 dark:border-indigo-800"
+            className="text-center p-6 rounded-xl bg-gradient-to-br from-[#26547C]/10 via-[#EF476F]/10 to-[#06D6A0]/10 dark:from-[#26547C]/20 dark:via-[#EF476F]/20 dark:to-[#06D6A0]/20 border-2 border-[#26547C]/30 dark:border-[#26547C]/50 backdrop-blur-sm"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -131,14 +132,14 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
             >
               {habit.icon}
             </motion.div>
-            <h3 className="text-lg sm:text-xl font-bold mb-2">{habit.name}</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-2 text-[#26547C] dark:text-[#60A5FA]">{habit.name}</h3>
             <motion.div
-              className="flex items-center justify-center gap-2 text-sm sm:text-base font-semibold text-indigo-600 dark:text-indigo-400"
+              className="flex items-center justify-center gap-2 text-sm sm:text-base font-semibold text-[#EF476F] dark:text-[#FB7185]"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
             >
-              <Zap className="h-4 w-4" />
+              <FontAwesomeIcon icon={Icons.bolt} className="h-4 w-4" />
               <span>+{habit.xp_value} XP</span>
             </motion.div>
           </motion.div>
@@ -157,10 +158,10 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border-2 transition-all min-h-[65px] sm:min-h-[75px] ${
+                  className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border-2 transition-all min-h-[65px] sm:min-h-[75px] bg-white dark:bg-slate-800 ${
                     mood === option.value
-                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950 shadow-md scale-105'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30'
+                      ? 'border-[#EF476F] bg-[#EF476F]/10 dark:bg-[#EF476F]/20 shadow-md scale-105'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-[#EF476F]/50 dark:hover:border-[#EF476F]/50 hover:bg-[#EF476F]/5 dark:hover:bg-[#EF476F]/10'
                   }`}
                 >
                   <motion.div
@@ -190,10 +191,10 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
                   transition={{ delay: index * 0.05 + 0.2 }}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border-2 transition-all min-h-[65px] sm:min-h-[75px] ${
+                  className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border-2 transition-all min-h-[65px] sm:min-h-[75px] bg-white dark:bg-slate-800 ${
                     energy === option.value
-                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950 shadow-md scale-105'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30'
+                      ? 'border-[#06D6A0] bg-[#06D6A0]/10 dark:bg-[#06D6A0]/20 shadow-md scale-105'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-[#06D6A0]/50 dark:hover:border-[#06D6A0]/50 hover:bg-[#06D6A0]/5 dark:hover:bg-[#06D6A0]/10'
                   }`}
                 >
                   <motion.div
@@ -242,7 +243,7 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
               <Button
                 onClick={handleComplete}
                 disabled={completeHabit.isPending}
-                className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white shadow-lg"
+                className="w-full bg-gradient-to-r from-[#26547C] via-[#EF476F] to-[#06D6A0] hover:from-[#1e4260] hover:via-[#d63d62] hover:to-[#05c18f] text-white shadow-lg font-semibold"
               >
                 {completeHabit.isPending ? (
                   <span className="flex items-center gap-2">
@@ -250,13 +251,13 @@ export function CompletionModal({ habit, userId, isOpen, onClose }: CompletionMo
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     >
-                      <Sparkles className="h-4 w-4" />
+                      <FontAwesomeIcon icon={Icons.sparkles} className="h-4 w-4" />
                     </motion.div>
                     Completing...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <Zap className="h-4 w-4" />
+                    <FontAwesomeIcon icon={Icons.bolt} className="h-4 w-4" />
                     Complete
                   </span>
                 )}

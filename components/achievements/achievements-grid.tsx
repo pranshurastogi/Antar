@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Lock } from "lucide-react"
 import { motion } from "framer-motion"
 import { formatDate } from "@/lib/utils/dates"
+import { FunLoader } from "@/components/ui/fun-loader"
 
 interface AchievementsGridProps {
   userId: string
@@ -25,13 +26,7 @@ export function AchievementsGrid({ userId }: AchievementsGridProps) {
   const { data: userAchievements, isLoading: userLoading } = useUserAchievements(userId)
 
   if (achievementsLoading || userLoading) {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <Skeleton key={i} className="h-48" />
-        ))}
-      </div>
-    )
+    return <FunLoader message="Loading achievements..." size="md" />
   }
 
   const unlockedIds = new Set(userAchievements?.map(ua => ua.achievement_id))

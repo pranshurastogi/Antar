@@ -6,13 +6,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Flame, Calendar, Target, TrendingUp, Clock, Zap, ArrowLeft, CheckCircle2, Trophy, Star, Sparkles, Edit } from "lucide-react"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Icons } from "@/lib/icons"
 import { useRouter } from "next/navigation"
 import { formatDate } from "@/lib/utils/dates"
 import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 import { HabitFormContent } from "@/components/habits/habit-form"
+import "@/components/habits/notebook-theme.css"
 
 interface HabitDetailViewProps {
   habitId: string
@@ -106,7 +108,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
         </div>
         <div className="flex gap-3">
           <Button onClick={() => router.push('/dashboard')} variant="default" size="lg">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <FontAwesomeIcon icon={Icons.arrowLeft} className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           <Button onClick={() => router.back()} variant="outline" size="lg">
@@ -185,12 +187,12 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
       >
         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
+            <FontAwesomeIcon icon={Icons.arrowLeft} className="h-5 w-5" />
           </Button>
         </motion.div>
-        <div className="flex-1">
+        <div className="flex-1 relative">
           <motion.h1 
-            className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+            className="handwritten-title"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -198,29 +200,32 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
             {habit.name}
           </motion.h1>
           <motion.p 
-            className="text-muted-foreground mt-1"
+            className="handwritten-text text-muted-foreground mt-2 text-lg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {habit.description || "No description"}
+            {habit.description || "No description yet..."}
           </motion.p>
+          <div className="scribble-decoration scribble-1" />
+          <div className="scribble-decoration scribble-2" />
         </div>
         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <Button
             variant="outline"
+            className="bg-white dark:bg-slate-900 border-2 border-[#26547C] dark:border-[#60A5FA]"
             onClick={() => {
               setShowEditDialog(true)
               router.push(`/dashboard/habits/${habitId}?edit=true`)
             }}
           >
-            <Edit className="h-4 w-4 mr-2" />
+            <FontAwesomeIcon icon={Icons.edit} className="h-4 w-4 mr-2" />
             Edit
           </Button>
         </motion.div>
       </motion.div>
 
-      {/* Motivational Quote Banner */}
+      {/* Motivational Quote Banner - Notebook Style */}
       <AnimatePresence mode="wait">
         <motion.div
           key={quoteIndex}
@@ -228,30 +233,34 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-pink-500/20 border border-blue-200/50 dark:border-blue-800/50 p-4"
+          className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#FFD166]/20 via-[#EF476F]/10 to-[#06D6A0]/20 dark:from-[#FFD166]/30 dark:via-[#EF476F]/20 dark:to-[#06D6A0]/30 border-2 border-[#FFD166]/30 dark:border-[#FFD166]/50 p-4 bg-white/80 dark:bg-slate-900/80"
         >
           <div className="flex items-center gap-3">
             <motion.div
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             >
-              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <FontAwesomeIcon icon={Icons.sparkles} className="h-5 w-5 text-[#FFD166]" />
             </motion.div>
-            <p className="text-sm sm:text-base font-medium text-foreground flex-1">
+            <p className="handwritten-text text-sm sm:text-base font-medium text-foreground flex-1">
               {motivationalQuotes[quoteIndex]}
             </p>
           </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Main Stats Card */}
+      {/* Main Stats Card - Notebook Style */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
+        className="notebook-container relative"
       >
-        <Card className="overflow-hidden border-2 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-blue-50/50 via-purple-50/50 to-pink-50/50 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20">
+        <div className="sticker" style={{ top: '10px', right: '20px' }}>
+          📊 Stats
+        </div>
+        <Card className="overflow-hidden border-2 border-[#26547C]/30 dark:border-[#60A5FA]/30 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-[#26547C]/10 via-[#EF476F]/10 to-[#06D6A0]/10 dark:from-[#26547C]/20 dark:via-[#EF476F]/20 dark:to-[#06D6A0]/20 border-b-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
             <div className="flex items-center gap-4">
               <motion.div
                 className="flex h-20 w-20 items-center justify-center rounded-2xl shadow-lg"
@@ -282,20 +291,20 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
                     <Badge variant="secondary" className="capitalize">{habit.difficulty_level}</Badge>
                   )}
                   {habit.xp_value && (
-                    <Badge className="bg-indigo-600">
-                      <Zap className="h-3 w-3 mr-1" />
+                    <Badge className="bg-[#26547C] dark:bg-[#60A5FA]">
+                      <FontAwesomeIcon icon={Icons.bolt} className="h-3 w-3 mr-1" />
                       +{habit.xp_value} XP
                     </Badge>
                   )}
                   {isOnFire && (
-                    <Badge className="bg-orange-500 animate-pulse">
-                      <Flame className="h-3 w-3 mr-1" />
+                    <Badge className="bg-[#EF476F] dark:bg-[#FB7185] animate-pulse">
+                      <FontAwesomeIcon icon={Icons.fire} className="h-3 w-3 mr-1" />
                       On Fire!
                     </Badge>
                   )}
                   {isConsistent && (
-                    <Badge className="bg-emerald-500">
-                      <Star className="h-3 w-3 mr-1" />
+                    <Badge className="bg-[#06D6A0] dark:bg-[#34D399]">
+                      <FontAwesomeIcon icon={Icons.star} className="h-3 w-3 mr-1" />
                       Consistent
                     </Badge>
                   )}
@@ -307,7 +316,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
             {/* Streak Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <motion.div 
-                className="p-4 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/20 border-2 border-orange-200 dark:border-orange-800 relative overflow-hidden"
+                className="p-4 rounded-xl bg-gradient-to-br from-[#EF476F]/20 to-[#EF476F]/10 dark:from-[#EF476F]/30 dark:to-[#EF476F]/20 border-2 border-[#EF476F]/30 dark:border-[#FB7185]/50 relative overflow-hidden"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
@@ -325,15 +334,15 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
                       repeat: Infinity
                     }}
                   >
-                    <Flame className="h-8 w-8 text-orange-500 opacity-30" />
+                    <FontAwesomeIcon icon={Icons.fire} className="h-8 w-8 text-[#EF476F] opacity-30" />
                   </motion.div>
                 )}
                 <div className="flex items-center gap-2 mb-2 relative z-10">
-                  <Flame className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                  <span className="text-sm text-muted-foreground font-medium">Current Streak</span>
+                  <FontAwesomeIcon icon={Icons.fire} className="h-5 w-5 text-[#EF476F] dark:text-[#FB7185]" />
+                  <span className="handwritten-label text-sm text-muted-foreground">Current Streak</span>
                 </div>
                 <motion.p 
-                  className="text-3xl font-bold text-orange-600 dark:text-orange-400 relative z-10"
+                  className="stats-badge text-[#EF476F] dark:text-[#FB7185] relative z-10"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
@@ -350,11 +359,11 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
                 whileHover={{ scale: 1.05 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                  <span className="text-sm text-muted-foreground font-medium">Best Streak</span>
+                  <FontAwesomeIcon icon={Icons.arrowTrendUp} className="h-5 w-5 text-[#EF476F] dark:text-[#FB7185]" />
+                  <span className="handwritten-label text-sm text-muted-foreground">Best Streak</span>
                 </div>
                 <motion.p 
-                  className="text-3xl font-bold text-purple-600 dark:text-purple-400"
+                  className="stats-badge text-[#EF476F] dark:text-[#FB7185]"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.45, type: "spring", stiffness: 200 }}
@@ -364,18 +373,18 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
               </motion.div>
               
               <motion.div 
-                className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800"
+                className="p-4 rounded-xl bg-gradient-to-br from-[#06D6A0]/20 to-[#06D6A0]/10 dark:from-[#06D6A0]/30 dark:to-[#06D6A0]/20 border-2 border-[#06D6A0]/30 dark:border-[#06D6A0]/50"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
                 whileHover={{ scale: 1.05 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Target className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-sm text-muted-foreground font-medium">Total</span>
+                  <FontAwesomeIcon icon={Icons.target} className="h-5 w-5 text-[#06D6A0] dark:text-[#34D399]" />
+                  <span className="handwritten-label text-sm text-muted-foreground">Total</span>
                 </div>
                 <motion.p 
-                  className="text-3xl font-bold text-emerald-600 dark:text-emerald-400"
+                  className="stats-badge text-[#06D6A0] dark:text-[#34D399]"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
@@ -385,15 +394,15 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
               </motion.div>
               
               <motion.div 
-                className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-2 border-blue-200 dark:border-blue-800"
+                className="p-4 rounded-xl bg-gradient-to-br from-[#26547C]/20 to-[#26547C]/10 dark:from-[#26547C]/30 dark:to-[#26547C]/20 border-2 border-[#26547C]/30 dark:border-[#60A5FA]/50"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.45 }}
                 whileHover={{ scale: 1.05 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span className="text-sm text-muted-foreground font-medium">Rate</span>
+                  <FontAwesomeIcon icon={Icons.calendar} className="h-5 w-5 text-[#26547C] dark:text-[#60A5FA]" />
+                  <span className="handwritten-label text-sm text-muted-foreground">Rate</span>
                 </div>
                 <motion.p 
                   className="text-3xl font-bold text-blue-600 dark:text-blue-400"
@@ -416,10 +425,10 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-yellow-500" />
-                    <span className="text-sm font-medium text-muted-foreground">Completion Rate</span>
+                    <FontAwesomeIcon icon={Icons.trophy} className="h-4 w-4 text-[#FFD166]" />
+                    <span className="handwritten-label text-sm text-muted-foreground">Completion Rate</span>
                   </div>
-                  <span className="font-bold text-lg">{Math.round(streak.completion_rate)}%</span>
+                  <span className="stats-badge text-[#FFD166]">{Math.round(streak.completion_rate)}%</span>
                 </div>
                 <div className="relative">
                   <Progress 
@@ -427,7 +436,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
                     className="h-4 bg-muted"
                   />
                   <motion.div
-                    className="absolute top-0 left-0 h-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
+                    className="absolute top-0 left-0 h-4 bg-gradient-to-r from-[#26547C] via-[#EF476F] to-[#06D6A0] rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${streak.completion_rate}%` }}
                     transition={{ delay: 0.7, duration: 1, ease: "easeOut" }}
@@ -438,9 +447,9 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1 }}
-                    className="text-sm text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-2"
+                    className="handwritten-text text-sm text-[#06D6A0] dark:text-[#34D399] font-medium flex items-center gap-2"
                   >
-                    <Star className="h-4 w-4" />
+                    <FontAwesomeIcon icon={Icons.star} className="h-4 w-4" />
                     Outstanding consistency! Keep it up! 🎉
                   </motion.p>
                 )}
@@ -456,46 +465,46 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
             >
               {habit.preferred_time && (
                 <motion.div 
-                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-colors border border-[#26547C]/20 dark:border-[#60A5FA]/20"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <FontAwesomeIcon icon={Icons.clock} className="h-5 w-5 text-[#26547C] dark:text-[#60A5FA]" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Preferred Time</p>
-                    <p className="font-semibold">{habit.preferred_time}</p>
+                    <p className="handwritten-label text-sm text-muted-foreground">Preferred Time</p>
+                    <p className="handwritten-text font-semibold">{habit.preferred_time}</p>
                   </div>
                 </motion.div>
               )}
               {habit.estimated_duration && (
                 <motion.div 
-                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-colors border border-[#EF476F]/20 dark:border-[#FB7185]/20"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <FontAwesomeIcon icon={Icons.clock} className="h-5 w-5 text-[#EF476F] dark:text-[#FB7185]" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Estimated Duration</p>
-                    <p className="font-semibold">~{habit.estimated_duration} minutes</p>
+                    <p className="handwritten-label text-sm text-muted-foreground">Estimated Duration</p>
+                    <p className="handwritten-text font-semibold">~{habit.estimated_duration} minutes</p>
                   </div>
                 </motion.div>
               )}
               <motion.div 
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-colors border border-[#06D6A0]/20 dark:border-[#34D399]/20"
                 whileHover={{ scale: 1.02 }}
               >
-                <Calendar className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <FontAwesomeIcon icon={Icons.calendar} className="h-5 w-5 text-[#06D6A0] dark:text-[#34D399]" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Frequency</p>
-                  <p className="font-semibold capitalize">{habit.frequency_type.replace('_', ' ')}</p>
+                  <p className="handwritten-label text-sm text-muted-foreground">Frequency</p>
+                  <p className="handwritten-text font-semibold capitalize">{habit.frequency_type.replace('_', ' ')}</p>
                 </div>
               </motion.div>
               <motion.div 
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-colors border border-[#FFD166]/20"
                 whileHover={{ scale: 1.02 }}
               >
-                <Zap className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                <FontAwesomeIcon icon={Icons.bolt} className="h-5 w-5 text-[#FFD166]" />
                 <div>
-                  <p className="text-sm text-muted-foreground">XP per Completion</p>
-                  <p className="font-semibold">+{habit.xp_value || 10} XP</p>
+                  <p className="handwritten-label text-sm text-muted-foreground">XP per Completion</p>
+                  <p className="handwritten-text font-semibold">+{habit.xp_value || 10} XP</p>
                 </div>
               </motion.div>
             </motion.div>
@@ -503,23 +512,27 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
         </Card>
       </motion.div>
 
-      {/* Recent Completions */}
+      {/* Recent Completions - Notebook Style */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.9, duration: 0.5 }}
+        className="notebook-container relative"
       >
+        <div className="sticker" style={{ top: '10px', right: '20px' }}>
+          📝 Journal
+        </div>
         {recentCompletions.length > 0 ? (
-          <Card className="border-2 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-emerald-50/50 to-blue-50/50 dark:from-emerald-950/20 dark:to-blue-950/20">
+          <Card className="border-2 border-[#26547C]/30 dark:border-[#60A5FA]/30 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
+            <CardHeader className="bg-gradient-to-r from-[#06D6A0]/10 via-[#26547C]/10 to-[#EF476F]/10 dark:from-[#06D6A0]/20 dark:via-[#26547C]/20 dark:to-[#EF476F]/20 border-b-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                <CardTitle>Recent Completions</CardTitle>
+                <FontAwesomeIcon icon={Icons.circleCheck} className="h-5 w-5 text-[#06D6A0] dark:text-[#34D399]" />
+                <CardTitle className="handwritten-title text-2xl">Recent Completions</CardTitle>
               </div>
-              <CardDescription>Your last 10 completions - Keep up the amazing work! 🎉</CardDescription>
+              <CardDescription className="handwritten-text">Your last 10 completions - Keep up the amazing work! 🎉</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <AnimatePresence>
                   {recentCompletions.map((completion, index) => (
                     <motion.div
@@ -528,39 +541,53 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      className="flex items-center justify-between p-4 rounded-xl border-2 bg-gradient-to-r from-card to-card/50 hover:from-card/80 hover:to-card/60 transition-all"
-                      whileHover={{ scale: 1.02, borderColor: "rgb(34, 197, 94)" }}
+                      className="notebook-entry relative"
                     >
-                      <div className="flex items-center gap-3">
-                        <motion.div 
-                          className="h-3 w-3 rounded-full bg-emerald-500"
-                          animate={{ 
-                            scale: [1, 1.2, 1],
-                            opacity: [1, 0.7, 1]
-                          }}
-                          transition={{ 
-                            duration: 2,
-                            repeat: Infinity
-                          }}
-                        />
-                        <div>
-                          <p className="font-semibold">{formatDate(completion.completion_date, "MMM dd, yyyy")}</p>
-                          {completion.completed_time && (
-                            <p className="text-xs text-muted-foreground">{completion.completed_time}</p>
-                          )}
+                      <div className="paper-clip" />
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <motion.div 
+                              className="h-3 w-3 rounded-full bg-[#06D6A0]"
+                              animate={{ 
+                                scale: [1, 1.2, 1],
+                                opacity: [1, 0.7, 1]
+                              }}
+                              transition={{ 
+                                duration: 2,
+                                repeat: Infinity
+                              }}
+                            />
+                            <div>
+                              <p className="handwritten-text font-semibold text-lg">{formatDate(completion.completion_date, "MMM dd, yyyy")}</p>
+                              {completion.completed_time && (
+                                <p className="handwritten-text text-xs text-muted-foreground">{completion.completed_time}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {completion.mood_rating && (
+                              <Badge variant="outline" className="text-xs bg-white dark:bg-slate-800 border-[#EF476F]/30">
+                                {Array(completion.mood_rating).fill("😊").join("")}
+                              </Badge>
+                            )}
+                            {completion.energy_level && (
+                              <Badge variant="outline" className="text-xs bg-white dark:bg-slate-800 border-[#FFD166]/30">
+                                {Array(completion.energy_level).fill("🔋").join("")}
+                              </Badge>
+                            )}
+                            {completion.xp_earned && (
+                              <Badge className="bg-[#26547C] dark:bg-[#60A5FA] text-xs">
+                                <FontAwesomeIcon icon={Icons.bolt} className="h-3 w-3 mr-1" />
+                                +{completion.xp_earned} XP
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {completion.mood_rating && (
-                          <Badge variant="outline" className="text-xs">
-                            {Array(completion.mood_rating).fill("😊").join("")}
-                          </Badge>
-                        )}
-                        {completion.xp_earned && (
-                          <Badge className="bg-indigo-600 text-xs">
-                            <Zap className="h-3 w-3 mr-1" />
-                            +{completion.xp_earned} XP
-                          </Badge>
+                        {completion.notes && (
+                          <div className="notebook-note">
+                            <p className="handwritten-text">{completion.notes}</p>
+                          </div>
                         )}
                       </div>
                     </motion.div>
@@ -573,7 +600,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-12 px-6 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 border-2 border-dashed"
+            className="text-center py-12 px-6 rounded-xl bg-white/90 dark:bg-slate-900/90 border-2 border-dashed border-[#26547C]/30 dark:border-[#60A5FA]/30 notebook-container"
           >
             <motion.div
               animate={{ 
@@ -585,10 +612,10 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
             >
               🎯
             </motion.div>
-            <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h3 className="handwritten-title text-2xl mb-2 text-[#26547C] dark:text-[#60A5FA]">
               Ready to Start?
             </h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <p className="handwritten-text text-muted-foreground max-w-md mx-auto">
               Complete this habit for the first time to see your progress here! Every journey begins with a single step. 💪
             </p>
           </motion.div>

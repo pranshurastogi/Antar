@@ -10,6 +10,7 @@ import { Clock, Users, Star } from "lucide-react"
 import { useCreateHabit } from "@/lib/hooks/useHabits"
 import { toast } from "react-hot-toast"
 import type { HabitTemplate } from "@/lib/types/database"
+import { FunLoader } from "@/components/ui/fun-loader"
 
 interface TemplatesBrowserProps {
   userId: string
@@ -62,13 +63,7 @@ export function TemplatesBrowser({ userId }: TemplatesBrowserProps) {
   }
 
   if (isLoading) {
-    return (
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Skeleton key={i} className="h-64" />
-        ))}
-      </div>
-    )
+    return <FunLoader message="Loading templates..." size="md" />
   }
 
   return (

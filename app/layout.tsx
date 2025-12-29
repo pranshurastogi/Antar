@@ -5,6 +5,7 @@ import { QueryProvider } from '@/lib/providers/query-provider'
 import { ToasterProvider } from '@/lib/providers/toaster-provider'
 import { Footer } from '@/components/footer'
 import { CelebrationBurst, MobileFunIndicator } from '@/components/mobile/fun-elements'
+import '@/lib/icons' // Initialize Font Awesome icon library
 import './globals.css'
 
 const inter = Inter({ 
