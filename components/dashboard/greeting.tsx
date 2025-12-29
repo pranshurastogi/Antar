@@ -1,6 +1,7 @@
 "use client"
 
-import { useProfile } from "@/lib/hooks/useProfile"
+import { useProfile, useDashboardStats } from "@/lib/hooks/useProfile"
+import { useAIMotivationalMessageLegacy } from "@/lib/hooks/useAI"
 import { getTimeBasedGreeting } from "@/lib/utils/dates"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion, AnimatePresence } from "framer-motion"
@@ -13,7 +14,8 @@ interface DashboardGreetingProps {
   userId: string
 }
 
-const motivationalMessages = [
+// Fallback messages if AI fails
+const fallbackMessages = [
   "Let's make today count. Every small step forward is progress.",
   "Small habits, big changes. You've got this! 💪",
   "Consistency is the key. Keep going! ✨",
@@ -28,9 +30,14 @@ const motivationalMessages = [
 
 export function DashboardGreeting({ userId }: DashboardGreetingProps) {
   const { data: profile, isLoading, error } = useProfile(userId)
+  const { data: stats } = useDashboardStats(userId)
+  const { generate, isLoading: aiLoading } = useAIMotivationalMessageLegacy()
   const greeting = getTimeBasedGreeting()
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+  const [currentMessage, setCurrentMessage] = useState<string>(fallbackMessages[0])
+  const [messageIndex, setMessageIndex] = useState(0)
   const [displayName, setDisplayName] = useState<string>('Friend')
+  const [useAI, setUseAI] = useState(true)
+  const [aiGenerated, setAiGenerated] = useState(false)
 
   useEffect(() => {
     if (profile) {
@@ -38,14 +45,51 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
     }
   }, [profile])
 
-  // Cycle through messages every 5 seconds
+  // Generate AI message when stats are available
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => (prev + 1) % motivationalMessages.length)
-    }, 5000)
+    if (profile && stats && useAI && !aiLoading && !aiGenerated) {
+      generate({
+        currentStreak: stats.active_streaks || 0,
+        completionRate: stats.completion_rate || 0,
+        recentCompletions: stats.completed_today || 0,
+        userName: displayName,
+        timeOfDay: greeting,
+      }).then((message) => {
+        if (message) {
+          setCurrentMessage(message)
+          setAiGenerated(true)
+        } else {
+          // Fallback to static messages
+          setCurrentMessage(fallbackMessages[messageIndex])
+          setUseAI(false)
+        }
+      }).catch((error) => {
+        console.error("Error generating AI message:", error)
+        // Fallback to static messages
+        setCurrentMessage(fallbackMessages[messageIndex])
+        setUseAI(false) // Disable AI for this session if it fails
+      })
+    } else if (!useAI || !stats || !profile) {
+      // Use fallback messages
+      setCurrentMessage(fallbackMessages[messageIndex])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, stats, displayName, greeting, useAI, aiLoading, messageIndex, aiGenerated, generate])
 
-    return () => clearInterval(interval)
-  }, [])
+  // Cycle through fallback messages if AI is disabled or fails
+  useEffect(() => {
+    if (!useAI) {
+      const interval = setInterval(() => {
+        setMessageIndex((prev) => {
+          const newIndex = (prev + 1) % fallbackMessages.length
+          setCurrentMessage(fallbackMessages[newIndex])
+          return newIndex
+        })
+      }, 5000)
+
+      return () => clearInterval(interval)
+    }
+  }, [useAI])
 
   if (isLoading) {
     return (
@@ -65,8 +109,6 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
       </Alert>
     )
   }
-
-  const currentMessage = motivationalMessages[currentMessageIndex]
 
   return (
     <motion.div
@@ -100,21 +142,33 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
       </motion.h1>
       
       <div className="relative h-8 sm:h-10 md:h-12 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={currentMessageIndex}
-            className="handwritten-text text-sm sm:text-base md:text-lg text-muted-foreground absolute inset-0"
-            initial={{ opacity: 0, y: 20, x: -10 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            exit={{ opacity: 0, y: -20, x: 10 }}
-            transition={{ 
-              duration: 0.5,
-              ease: "easeInOut"
-            }}
-          >
-            {currentMessage}
-          </motion.p>
-        </AnimatePresence>
+        {aiLoading ? (
+          <div className="flex items-center gap-2">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <FontAwesomeIcon icon={Icons.sparkles} className="h-4 w-4 text-[#FFD166]" />
+            </motion.div>
+            <Skeleton className="h-4 w-48" />
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={currentMessage}
+              className="handwritten-text text-sm sm:text-base md:text-lg text-muted-foreground absolute inset-0"
+              initial={{ opacity: 0, y: 20, x: -10 }}
+              animate={{ opacity: 1, y: 0, x: 0 }}
+              exit={{ opacity: 0, y: -20, x: 10 }}
+              transition={{ 
+                duration: 0.5,
+                ease: "easeInOut"
+              }}
+            >
+              {currentMessage}
+            </motion.p>
+          </AnimatePresence>
+        )}
       </div>
     </motion.div>
   )

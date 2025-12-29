@@ -1,11 +1,14 @@
 "use client"
 
 import { useHabit } from "@/lib/hooks/useHabits"
+import { useCompletions } from "@/lib/hooks/useCompletions"
+import { useAIAnalyzePatterns } from "@/lib/hooks/useAI"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Icons } from "@/lib/icons"
 import { useRouter } from "next/navigation"
@@ -14,6 +17,7 @@ import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 import { HabitFormContent } from "@/components/habits/habit-form"
+import { Spinner } from "@/components/ui/spinner"
 import "@/components/habits/notebook-theme.css"
 
 interface HabitDetailViewProps {
@@ -33,8 +37,11 @@ const motivationalQuotes = [
 export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailViewProps) {
   const router = useRouter()
   const { data: habit, isLoading, error } = useHabit(habitId, userId)
+  const { data: allCompletions } = useCompletions(userId)
+  const { analyze, isLoading: aiAnalyzing, analysis } = useAIAnalyzePatterns()
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [showEditDialog, setShowEditDialog] = useState(isEditMode)
+  const [insightsLoaded, setInsightsLoaded] = useState(false)
 
   useEffect(() => {
     setShowEditDialog(isEditMode)
@@ -46,6 +53,27 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
     }, 4000)
     return () => clearInterval(interval)
   }, [])
+
+  // Load AI insights when completions are available
+  useEffect(() => {
+    if (allCompletions && allCompletions.length > 0 && !insightsLoaded && habit) {
+      const habitCompletions = allCompletions
+        .filter(c => c.habit_id === habitId)
+        .slice(-30) // Last 30 completions
+        .map(c => ({
+          date: c.completion_date,
+          time: c.completed_time || "Unknown",
+          mood: c.mood_rating || undefined,
+          energy: c.energy_level || undefined,
+          habitName: habit.name,
+        }))
+
+      if (habitCompletions.length > 0) {
+        analyze(habitCompletions)
+        setInsightsLoaded(true)
+      }
+    }
+  }, [allCompletions, habit, habitId, analyze, insightsLoaded])
 
   // Show edit dialog when in edit mode
   // We render it alongside the detail view so the dialog can overlay
@@ -511,6 +539,107 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* AI Insights - Notebook Style */}
+      {habit && recentCompletions.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+          className="notebook-container relative"
+        >
+          <div className="sticker teal" style={{ top: '10px', right: '20px' }}>
+            🤖 AI Insights
+          </div>
+          <Card className="border-2 border-[#26547C]/30 dark:border-[#60A5FA]/30 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
+            <CardHeader className="bg-gradient-to-r from-[#06D6A0]/10 via-[#26547C]/10 to-[#EF476F]/10 dark:from-[#06D6A0]/20 dark:via-[#26547C]/20 dark:to-[#EF476F]/20 border-b-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
+              <div className="flex items-center gap-2">
+                <FontAwesomeIcon icon={Icons.brain} className="h-5 w-5 text-[#26547C] dark:text-[#60A5FA]" />
+                <CardTitle className="handwritten-title text-xl sm:text-2xl">AI-Powered Insights</CardTitle>
+              </div>
+              <CardDescription className="handwritten-text">Discover patterns and optimize your habit journey</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {aiAnalyzing ? (
+                <div className="flex flex-col items-center justify-center py-8 gap-4">
+                  <Spinner className="h-8 w-8 text-[#26547C] dark:text-[#60A5FA]" />
+                  <p className="handwritten-text text-muted-foreground">Analyzing your patterns...</p>
+                </div>
+              ) : analysis ? (
+                <div className="space-y-4">
+                  {analysis.insights && analysis.insights.length > 0 && (
+                    <div className="notebook-entry p-4 border-[#26547C]/30 dark:border-[#60A5FA]/30">
+                      <h4 className="handwritten-label font-semibold text-[#26547C] dark:text-[#60A5FA] mb-3 flex items-center gap-2">
+                        <FontAwesomeIcon icon={Icons.circleInfo} className="h-4 w-4" />
+                        Key Insights
+                      </h4>
+                      <ul className="space-y-2">
+                        {analysis.insights.map((insight, idx) => (
+                          <li key={idx} className="handwritten-text text-sm flex items-start gap-2">
+                            <span className="text-[#06D6A0] mt-1">•</span>
+                            <span>{insight}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysis.recommendations && analysis.recommendations.length > 0 && (
+                    <div className="notebook-entry p-4 border-[#06D6A0]/30 dark:border-[#34D399]/30">
+                      <h4 className="handwritten-label font-semibold text-[#06D6A0] dark:text-[#34D399] mb-3 flex items-center gap-2">
+                        <FontAwesomeIcon icon={Icons.target} className="h-4 w-4" />
+                        Recommendations
+                      </h4>
+                      <ul className="space-y-2">
+                        {analysis.recommendations.map((rec, idx) => (
+                          <li key={idx} className="handwritten-text text-sm flex items-start gap-2">
+                            <span className="text-[#06D6A0] mt-1">→</span>
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysis.bestTime && (
+                    <div className="notebook-entry p-4 border-[#FFD166]/30">
+                      <h4 className="handwritten-label font-semibold text-[#FFD166] mb-2 flex items-center gap-2">
+                        <FontAwesomeIcon icon={Icons.clock} className="h-4 w-4" />
+                        Optimal Time
+                      </h4>
+                      <p className="handwritten-text text-sm">{analysis.bestTime}</p>
+                    </div>
+                  )}
+
+                  {analysis.patterns && analysis.patterns.length > 0 && (
+                    <div className="notebook-entry p-4 border-[#EF476F]/30 dark:border-[#FB7185]/30">
+                      <h4 className="handwritten-label font-semibold text-[#EF476F] dark:text-[#FB7185] mb-3 flex items-center gap-2">
+                        <FontAwesomeIcon icon={Icons.chartLine} className="h-4 w-4" />
+                        Patterns
+                      </h4>
+                      <ul className="space-y-2">
+                        {analysis.patterns.map((pattern, idx) => (
+                          <li key={idx} className="handwritten-text text-sm flex items-start gap-2">
+                            <span className="text-[#EF476F] mt-1">📊</span>
+                            <span>{pattern}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Alert className="bg-[#FFD166]/10 border-[#FFD166]">
+                  <FontAwesomeIcon icon={Icons.circleInfo} className="h-4 w-4" />
+                  <AlertDescription className="handwritten-text">
+                    Complete more habits to unlock AI insights! 🚀
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Recent Completions - Notebook Style */}
       <motion.div

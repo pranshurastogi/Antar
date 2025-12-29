@@ -8,6 +8,7 @@ import { DashboardGreeting } from "@/components/dashboard/greeting"
 import { PetWidget } from "@/components/gamification/pet-widget"
 import { StreakCalendar } from "@/components/habits/streak-calendar"
 import { XPBar } from "@/components/gamification/xp-bar"
+import { AIHabitSuggestions } from "@/components/habits/ai-habit-suggestions"
 import { MobileNav } from "@/components/mobile-nav"
 import "@/components/habits/notebook-theme.css"
 
@@ -83,6 +84,11 @@ export default async function DashboardPage() {
             </div>
             <StreakCalendar userId={user.id} />
           </div>
+        </div>
+
+        {/* AI Habit Suggestions */}
+        <div className="relative">
+          <AIHabitSuggestions userId={user.id} />
         </div>
       </div>
 

@@ -13,8 +13,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
 import { useCreateHabit, useUpdateHabit } from "@/lib/hooks/useHabits"
+import { useAIHabitDescription } from "@/lib/hooks/useAI"
 import { getXpForDifficulty } from "@/lib/utils/xp"
 import { toast } from "react-hot-toast"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Icons } from "@/lib/icons"
+import { Spinner } from "@/components/ui/spinner"
 
 const habitSchema = z.object({
   name: z.string().min(1, "Name is required").max(60, "Name too long"),
@@ -53,6 +57,7 @@ interface HabitFormContentProps {
 export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEditMode = false }: HabitFormContentProps) {
   const createHabit = useCreateHabit()
   const updateHabit = useUpdateHabit()
+  const { generate: generateDescription, isLoading: aiDescriptionLoading } = useAIHabitDescription()
   const [selectedDays, setSelectedDays] = useState<number[]>(
     (initialData?.frequency_config as any)?.days || []
   )
@@ -183,7 +188,39 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">Description (Optional)</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description">Description (Optional)</Label>
+          <button
+            type="button"
+            onClick={async () => {
+              const habitName = watch('name')
+              if (!habitName) {
+                toast.error("Please enter a habit name first")
+                return
+              }
+              
+              const description = await generateDescription(habitName, selectedCategory)
+              if (description) {
+                setValue('description', description)
+                toast.success("Description generated! ✨")
+              }
+            }}
+            disabled={aiDescriptionLoading || !watch('name')}
+            className="flex items-center gap-2 text-xs text-[#26547C] dark:text-[#60A5FA] hover:text-[#26547C]/80 dark:hover:text-[#60A5FA]/80 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {aiDescriptionLoading ? (
+              <>
+                <Spinner className="h-3 w-3" />
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <FontAwesomeIcon icon={Icons.sparkles} className="h-3 w-3" />
+                <span>AI Generate</span>
+              </>
+            )}
+          </button>
+        </div>
         <Textarea
           id="description"
           placeholder="Why is this habit important to you?"
