@@ -1,31 +1,168 @@
-// Google Gemini AI integration for habit tracking
+// AI Integration for habit tracking
+// Priority: Gemini → AI/ML API (Gemma) → Static Fallback
 import { GoogleGenAI } from "@google/genai"
 
-// Initialize Gemini AI
-// The client automatically gets the API key from the environment variable GEMINI_API_KEY
-let aiInstance: GoogleGenAI | null = null
+// ============= CONFIGURATION =============
+const GEMINI_MODEL = "gemini-2.0-flash"
+const AIML_BASE_URL = "https://api.aimlapi.com/v1"
+// AI/ML API models - try multiple until one works
+// Prioritize gpt-4o since we know it works
+const AIML_MODELS = [
+  "gpt-4o",                             // High quality - confirmed working!
+  "gpt-4o-mini",                        // Fast, cheap, reliable
+  "gpt-3.5-turbo",                      // Classic, widely available
+  "claude-3-haiku-20240307",            // Anthropic fast model
+  "mistralai/Mistral-7B-Instruct-v0.2", // Open source
+]
 
-const getGenAI = () => {
-  if (aiInstance) {
-    return aiInstance
-  }
-  
+// ============= AI PROVIDERS =============
+
+// Provider 1: Google Gemini
+async function callGemini(prompt: string): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set in environment variables")
+    console.log("⚠️ GEMINI_API_KEY not set, skipping Gemini")
+    return null
   }
-  
-  // Reuse the same instance for better performance
-  aiInstance = new GoogleGenAI({ apiKey })
-  return aiInstance
+
+  try {
+    console.log("🔷 Trying Gemini API...")
+    const ai = new GoogleGenAI({ apiKey })
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+    })
+    
+    if (response.text) {
+      console.log("✅ Gemini responded successfully!")
+      return response.text
+    }
+    return null
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    if (msg.includes("429") || msg.includes("quota")) {
+      console.log("⚠️ Gemini rate limited, trying fallback...")
+    } else {
+      console.error("❌ Gemini error:", msg)
+    }
+    return null
+  }
 }
 
-// Fallback messages for when AI fails
-const FALLBACK_MOTIVATIONAL_MESSAGES = [
-  "Let's make today count. Every small step forward is progress.",
-  "Small habits, big changes. You've got this! 💪",
-  "Consistency is the key. Keep going! ✨",
-  "Every completion is a victory. Celebrate the journey! 🎉",
+// Provider 2: AI/ML API (GPT/Claude/Mistral models)
+async function callAIML(prompt: string, systemPrompt?: string): Promise<string | null> {
+  const apiKey = process.env.AI_KEY
+  if (!apiKey) {
+    console.log("⚠️ AI_KEY not set, skipping AI/ML API")
+    return null
+  }
+
+  // Try each model until one works
+  for (const model of AIML_MODELS) {
+    try {
+      console.log(`🔶 Trying AI/ML API with ${model}...`)
+      
+      const response = await fetch(`${AIML_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 1024,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.log(`⚠️ ${model} failed (${response.status}):`, errorText.substring(0, 150))
+        continue // Try next model
+      }
+
+      const data = await response.json()
+      const text = data.choices?.[0]?.message?.content
+      
+      if (text && text.trim()) {
+        console.log(`✅ AI/ML API (${model}) responded successfully!`)
+        console.log(`📄 Response preview:`, text.substring(0, 100) + "...")
+        return text
+      } else {
+        console.log(`⚠️ ${model} returned empty response`)
+      }
+    } catch (error) {
+      console.error(`❌ ${model} error:`, error instanceof Error ? error.message : error)
+      // Continue to next model
+    }
+  }
+  
+  console.log("❌ All AI/ML API models failed")
+  return null
+}
+
+// Combined AI call with fallback chain
+async function callAI(prompt: string, systemPrompt?: string): Promise<string | null> {
+  // Try Gemini first
+  const geminiResult = await callGemini(prompt)
+  if (geminiResult) return geminiResult
+  
+  // Fallback to AI/ML API
+  const aimlResult = await callAIML(prompt, systemPrompt)
+  if (aimlResult) return aimlResult
+  
+  console.log("⚠️ All AI providers failed, using static fallback")
+  return null
+}
+
+// ============= HELPER FUNCTIONS =============
+
+function cleanAIResponse(text: string, maxLength?: number): string {
+  if (!text) return ""
+  
+  let cleaned = text
+    .replace(/^["']|["']$/g, '')
+    .replace(/```json\n?/g, '')
+    .replace(/```\n?/g, '')
+    .replace(/`/g, '')
+    .trim()
+  
+  if (maxLength && cleaned.length > maxLength) {
+    cleaned = cleaned.substring(0, maxLength - 3) + "..."
+  }
+  
+  return cleaned
+}
+
+function safeJSONParse<T>(text: string, fallback: T): T {
+  try {
+    const cleaned = cleanAIResponse(text)
+    const startIdx = Math.max(cleaned.indexOf('['), cleaned.indexOf('{'))
+    const endIdx = Math.max(cleaned.lastIndexOf(']'), cleaned.lastIndexOf('}'))
+    
+    if (startIdx === -1 || endIdx === -1) {
+      return JSON.parse(cleaned)
+    }
+    
+    const jsonStr = cleaned.substring(startIdx, endIdx + 1)
+    return JSON.parse(jsonStr) as T
+  } catch (error) {
+    console.error("JSON parse error:", error)
+    return fallback
+  }
+}
+
+// ============= FALLBACK DATA =============
+
+const FALLBACK_MOTIVATIONAL = [
+  "Let's make today count. Every small step is progress. 💪",
+  "Small habits, big changes. You've got this! ✨",
+  "Consistency is your superpower. Keep going! 🔥",
+  "Every completion is a victory. Celebrate! 🎉",
   "Your future self will thank you. Keep building! 🌱",
 ]
 
@@ -38,40 +175,43 @@ const FALLBACK_DESCRIPTIONS: Record<string, string> = {
   custom: "A personalized habit tailored to your unique goals.",
 }
 
-// Helper function to clean and validate AI responses
-function cleanAIResponse(text: string, maxLength?: number): string {
-  if (!text) return ""
-  
-  // Remove quotes, markdown code blocks, and extra whitespace
-  let cleaned = text
-    .replace(/^["']|["']$/g, '') // Remove surrounding quotes
-    .replace(/```json\n?/g, '') // Remove markdown code blocks
-    .replace(/```\n?/g, '')
-    .trim()
-  
-  // Limit length if specified
-  if (maxLength && cleaned.length > maxLength) {
-    cleaned = cleaned.substring(0, maxLength - 3) + "..."
+const FALLBACK_SUGGESTIONS = [
+  {
+    name: "Morning Meditation",
+    description: "Start your day with 5 minutes of mindfulness",
+    category: "mindfulness",
+    reason: "Builds mental clarity for your routine",
+    insight: "Morning meditation increases focus by 20% according to neuroscience research",
+    funFact: "Just 5 minutes can reduce stress hormones by 15%"
+  },
+  {
+    name: "Evening Walk",
+    description: "Take a 15-minute walk to reflect on your day",
+    category: "health",
+    reason: "Complements indoor habits with movement",
+    insight: "Walking after meals improves digestion and blood sugar regulation",
+    funFact: "Evening walks can improve sleep quality by 65%"
+  },
+  {
+    name: "Daily Reading",
+    description: "Read 10 pages before bed",
+    category: "learning",
+    reason: "Adds knowledge to your daily routine",
+    insight: "Reading before bed activates different brain regions than screen time",
+    funFact: "6 minutes of reading can reduce stress by 68%"
+  },
+  {
+    name: "Water Tracking",
+    description: "Drink 8 glasses of water throughout the day",
+    category: "health",
+    reason: "Hydration boosts energy and focus",
+    insight: "Even 2% dehydration can impair cognitive performance significantly",
+    funFact: "Your brain is 75% water - stay hydrated to think clearly!"
   }
-  
-  return cleaned
-}
+]
 
-// Helper function to parse JSON safely
-function safeJSONParse<T>(text: string, fallback: T): T {
-  try {
-    const cleaned = cleanAIResponse(text)
-    const parsed = JSON.parse(cleaned)
-    return parsed as T
-  } catch (error) {
-    console.error("JSON parse error:", error)
-    return fallback
-  }
-}
+// ============= EXPORTED FUNCTIONS =============
 
-/**
- * Generate personalized motivational message with improved prompt
- */
 export async function generateMotivationalMessage(
   userStats: {
     currentStreak: number
@@ -81,193 +221,110 @@ export async function generateMotivationalMessage(
     timeOfDay: string
   }
 ): Promise<string> {
-  try {
-    const ai = getGenAI()
+  console.log("\n🎯 generateMotivationalMessage called")
+  
+  const prompt = `Generate a short motivational message (max 80 chars) for ${userStats.userName} who has a ${userStats.currentStreak}-day streak and ${userStats.completionRate}% completion rate. Time: ${userStats.timeOfDay}. Use 1 emoji. Be warm and encouraging.`
 
-    // Improved prompt with better structure and context
-    const prompt = `You are a motivational coach for a habit-tracking app called "Antar". 
-Generate a personalized, encouraging message for ${userStats.userName}.
-
-Context:
-- Current streak: ${userStats.currentStreak} days
-- Completion rate: ${userStats.completionRate}%
-- Recent completions today: ${userStats.recentCompletions}
-- Time of day: ${userStats.timeOfDay}
-
-Requirements:
-- Maximum 80 characters
-- Friendly, warm, and encouraging tone
-- Reference their specific progress (streak or completion rate)
-- Match the time of day context
-- Use emojis sparingly (0-1 max)
-- No quotes, no markdown, just the message text
-
-Generate the message now:`
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt
-    })
-    
-    const text = response.text?.trim() || ""
-    const cleaned = cleanAIResponse(text, 100)
-    
-    return cleaned || FALLBACK_MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * FALLBACK_MOTIVATIONAL_MESSAGES.length)]
-  } catch (error) {
-    console.error("Error generating motivational message:", error)
-    // Return random fallback
-    return FALLBACK_MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * FALLBACK_MOTIVATIONAL_MESSAGES.length)]
+  const result = await callAI(prompt)
+  
+  if (result) {
+    return cleanAIResponse(result, 100)
   }
+  
+  return FALLBACK_MOTIVATIONAL[Math.floor(Math.random() * FALLBACK_MOTIVATIONAL.length)]
 }
 
-/**
- * Suggest new habits based on existing ones with improved prompt
- */
 export async function suggestHabits(
   currentHabits: Array<{ name: string; category: string }>,
   userGoals?: string
-): Promise<Array<{ name: string; description: string; category: string; reason: string }>> {
-  try {
-    const ai = getGenAI()
+): Promise<Array<{ name: string; description: string; category: string; reason: string; insight?: string; funFact?: string }>> {
+  console.log("\n🎯 ============= suggestHabits START =============")
+  console.log("📊 Current habits:", currentHabits.length)
+  console.log("🎯 User goals:", userGoals || "None")
+  
+  const habitsSummary = currentHabits.length > 0
+    ? currentHabits.map(h => `${h.name} (${h.category})`).join(", ")
+    : "No existing habits"
+  
+  const missingCategories = ['health', 'productivity', 'mindfulness', 'learning', 'social']
+    .filter(cat => !currentHabits.map(h => h.category).includes(cat))
 
-    const habitsSummary = currentHabits.length > 0
-      ? currentHabits.map(h => `${h.name} (${h.category})`).join(", ")
-      : "No existing habits"
-    
-    // Improved prompt with structured output guidance
-    const prompt = `You are a habit formation expert. Analyze the user's current habits and suggest complementary new habits.
+  const systemPrompt = `You are an expert habit formation coach. Analyze user habits and suggest complementary ones with scientific insights.`
+  
+  const prompt = `Analyze these habits: ${habitsSummary}
+${missingCategories.length > 0 ? `Missing categories: ${missingCategories.join(', ')}` : 'All categories covered'}
+${userGoals ? `User goals: ${userGoals}` : ''}
 
-Current habits: ${habitsSummary}
-${userGoals ? `User goals: ${userGoals}` : "No specific goals mentioned"}
-
-Task: Suggest 3-5 new habits that would complement their existing routine.
-
-Requirements:
-- Each habit should fill a gap or enhance their current routine
-- Categories must be one of: health, productivity, mindfulness, learning, social
-- Descriptions should be brief (1 sentence, max 100 chars)
-- Reasons should explain why it complements their routine (max 80 chars)
-- Make suggestions practical and achievable
-
-Return ONLY a valid JSON array in this exact format (no markdown, no code blocks):
+Suggest 4-5 personalized, complementary habits. Return ONLY valid JSON array (no markdown, no code blocks):
 [
   {
-    "name": "Habit Name",
-    "description": "Brief description",
+    "name": "Specific habit name",
+    "description": "What to do (30-80 chars)",
     "category": "health|productivity|mindfulness|learning|social",
-    "reason": "Why this complements their routine"
+    "reason": "Why it complements their routine (40-80 chars)",
+    "insight": "Behavioral science insight (50-100 chars)",
+    "funFact": "Interesting fact (40-80 chars)"
   }
-]`
+]
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt
-    })
+Make suggestions SPECIFIC and PERSONALIZED to their current habits.`
+
+  console.log("📤 Calling AI (Gemini → AI/ML API → Fallback)...")
+  const result = await callAI(prompt, systemPrompt)
+  
+  if (result) {
+    console.log("📥 AI Response received:", result.substring(0, 200) + "...")
+    const suggestions = safeJSONParse<Array<any>>(result, [])
     
-    let text = response.text?.trim() || ""
-    const suggestions = safeJSONParse<Array<{ name: string; description: string; category: string; reason: string }>>(
-      text,
-      []
-    )
-    
-    // Validate and sanitize suggestions
-    if (!Array.isArray(suggestions) || suggestions.length === 0) {
-      throw new Error("Invalid response format")
+    if (Array.isArray(suggestions) && suggestions.length > 0) {
+      const validSuggestions = suggestions
+        .filter(s => s && s.name && s.category)
+        .slice(0, 5)
+        .map(s => ({
+          name: String(s.name || "").trim().substring(0, 50),
+          description: String(s.description || "").trim().substring(0, 100),
+          category: String(s.category || "productivity").trim(),
+          reason: String(s.reason || "").trim().substring(0, 80),
+          insight: s.insight ? String(s.insight).trim().substring(0, 100) : undefined,
+          funFact: s.funFact ? String(s.funFact).trim().substring(0, 80) : undefined,
+        }))
+      
+      if (validSuggestions.length > 0) {
+        console.log("✅ Returning", validSuggestions.length, "AI-GENERATED suggestions")
+        console.log("🎉 ============= SUCCESS: USING AI =============\n")
+        return validSuggestions
+      } else {
+        console.log("⚠️ AI returned suggestions but none were valid")
+      }
+    } else {
+      console.log("⚠️ AI response was not a valid array")
     }
-    
-    // Validate each suggestion
-    const validSuggestions = suggestions
-      .filter(s => 
-        s.name && 
-        s.description && 
-        s.category && 
-        s.reason &&
-        ['health', 'productivity', 'mindfulness', 'learning', 'social'].includes(s.category)
-      )
-      .slice(0, 5) // Limit to 5
-      .map(s => ({
-        name: s.name.trim().substring(0, 50),
-        description: s.description.trim().substring(0, 100),
-        category: s.category.trim(),
-        reason: s.reason.trim().substring(0, 80),
-      }))
-    
-    return validSuggestions.length > 0 ? validSuggestions : [
-      {
-        name: "Morning Meditation",
-        description: "Start your day with 5 minutes of mindfulness",
-        category: "mindfulness",
-        reason: "Complements your existing routine with mental clarity"
-      },
-      {
-        name: "Evening Reflection",
-        description: "Reflect on your day and plan tomorrow",
-        category: "productivity",
-        reason: "Helps you stay organized and mindful"
-      }
-    ]
-  } catch (error) {
-    console.error("Error suggesting habits:", error)
-    // Return fallback suggestions
-    return [
-      {
-        name: "Morning Meditation",
-        description: "Start your day with 5 minutes of mindfulness",
-        category: "mindfulness",
-        reason: "Complements your existing routine with mental clarity"
-      },
-      {
-        name: "Evening Reflection",
-        description: "Reflect on your day and plan tomorrow",
-        category: "productivity",
-        reason: "Helps you stay organized and mindful"
-      }
-    ]
+  } else {
+    console.log("⚠️ No AI response received")
   }
+  
+  console.log("⚠️ Using static fallback suggestions")
+  console.log("❌ ============= FALLBACK USED =============\n")
+  return FALLBACK_SUGGESTIONS
 }
 
-/**
- * Generate habit description with improved prompt
- */
 export async function generateHabitDescription(
   habitName: string,
   category: string
 ): Promise<string> {
-  try {
-    const ai = getGenAI()
+  console.log("\n🎯 generateHabitDescription called for:", habitName)
+  
+  const prompt = `Generate a brief inspiring description (max 150 chars) for habit "${habitName}" (${category}). Explain why it matters. No quotes.`
 
-    const prompt = `You are a habit formation coach. Generate an inspiring description for a habit.
-
-Habit name: "${habitName}"
-Category: ${category}
-
-Requirements:
-- 2-3 sentences maximum
-- Maximum 150 characters total
-- Encouraging and specific to habit formation
-- Explain why this habit matters
-- No quotes, no markdown, just the description text
-
-Generate the description now:`
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt
-    })
-    
-    const text = response.text?.trim() || ""
-    const cleaned = cleanAIResponse(text, 150)
-    
-    return cleaned || FALLBACK_DESCRIPTIONS[category] || FALLBACK_DESCRIPTIONS.custom
-  } catch (error) {
-    console.error("Error generating habit description:", error)
-    return FALLBACK_DESCRIPTIONS[category] || FALLBACK_DESCRIPTIONS.custom
+  const result = await callAI(prompt)
+  
+  if (result) {
+    return cleanAIResponse(result, 150)
   }
+  
+  return FALLBACK_DESCRIPTIONS[category] || FALLBACK_DESCRIPTIONS.custom
 }
 
-/**
- * Analyze habit patterns and provide insights with improved prompt
- */
 export async function analyzeHabitPatterns(
   completions: Array<{
     date: string
@@ -282,147 +339,61 @@ export async function analyzeHabitPatterns(
   bestTime: string
   patterns: string[]
 }> {
-  try {
-    const ai = getGenAI()
-
-    // Limit data to avoid token limits and focus on recent patterns
-    const limitedCompletions = completions.slice(-50) // Last 50 completions
-    
-    if (limitedCompletions.length === 0) {
-      throw new Error("No completion data available")
-    }
-
-    // Calculate some basic stats for better context
-    const completionCount = limitedCompletions.length
-    const avgMood = limitedCompletions
-      .filter(c => c.mood !== undefined)
-      .reduce((sum, c) => sum + (c.mood || 0), 0) / limitedCompletions.filter(c => c.mood !== undefined).length || 0
-    
-    const timeGroups: Record<string, number> = {}
-    limitedCompletions.forEach(c => {
-      const hour = parseInt(c.time.split(':')[0]) || 12
-      const period = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening'
-      timeGroups[period] = (timeGroups[period] || 0) + 1
-    })
-    const bestTimePeriod = Object.entries(timeGroups).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Anytime'
-
-    const prompt = `You are a data analyst specializing in habit formation. Analyze the completion data and provide actionable insights.
-
-Completion Data (${completionCount} entries):
-${JSON.stringify(limitedCompletions.slice(-30))} // Last 30 for analysis
-
-Context:
-- Total completions analyzed: ${completionCount}
-- Average mood rating: ${avgMood > 0 ? avgMood.toFixed(1) : 'N/A'}
-- Most common completion time: ${bestTimePeriod}
-
-Task: Analyze patterns and provide insights.
-
-Requirements:
-- Insights: 3-5 key findings about their completion patterns (max 100 chars each)
-- Recommendations: 2-3 actionable tips to improve consistency (max 80 chars each)
-- Best time: Optimal completion time based on data (e.g., "Morning", "Afternoon", "Evening")
-- Patterns: 2-3 notable patterns you've identified (max 80 chars each)
-
-Return ONLY a valid JSON object in this exact format (no markdown, no code blocks):
-{
-  "insights": ["insight 1", "insight 2", "insight 3"],
-  "recommendations": ["recommendation 1", "recommendation 2"],
-  "bestTime": "Morning|Afternoon|Evening|Anytime",
-  "patterns": ["pattern 1", "pattern 2"]
-}`
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt
-    })
-    
-    let text = response.text?.trim() || ""
-    const analysis = safeJSONParse<{
-      insights: string[]
-      recommendations: string[]
-      bestTime: string
-      patterns: string[]
-    }>(text, {
-      insights: [],
-      recommendations: [],
-      bestTime: bestTimePeriod,
-      patterns: []
-    })
-    
-    // Validate and sanitize
+  console.log("\n🎯 analyzeHabitPatterns called with", completions.length, "completions")
+  
+  if (completions.length === 0) {
     return {
-      insights: (Array.isArray(analysis.insights) ? analysis.insights : []).slice(0, 5).map(i => i.substring(0, 100)),
-      recommendations: (Array.isArray(analysis.recommendations) ? analysis.recommendations : []).slice(0, 3).map(r => r.substring(0, 80)),
-      bestTime: analysis.bestTime || bestTimePeriod || "Anytime",
-      patterns: (Array.isArray(analysis.patterns) ? analysis.patterns : []).slice(0, 3).map(p => p.substring(0, 80))
-    }
-  } catch (error) {
-    console.error("Error analyzing patterns:", error)
-    // Return fallback insights
-    return {
-      insights: [
-        "Keep tracking your habits consistently",
-        "Try to maintain your current completion rate"
-      ],
-      recommendations: [
-        "Set reminders for your preferred times",
-        "Focus on consistency over perfection"
-      ],
+      insights: ["Start tracking to see insights!"],
+      recommendations: ["Complete your first habit"],
       bestTime: "Anytime",
-      patterns: ["Continue building your routine"]
+      patterns: ["Building your routine"]
     }
+  }
+
+  const prompt = `Analyze habits: ${JSON.stringify(completions.slice(-20))}
+Return JSON: {"insights":["insight1"],"recommendations":["rec1"],"bestTime":"Morning|Afternoon|Evening","patterns":["pattern1"]}`
+
+  const result = await callAI(prompt)
+  
+  if (result) {
+    const analysis = safeJSONParse<any>(result, null)
+    if (analysis) {
+      return {
+        insights: (analysis.insights || []).slice(0, 5).map((i: any) => String(i).substring(0, 100)),
+        recommendations: (analysis.recommendations || []).slice(0, 3).map((r: any) => String(r).substring(0, 80)),
+        bestTime: analysis.bestTime || "Anytime",
+        patterns: (analysis.patterns || []).slice(0, 3).map((p: any) => String(p).substring(0, 80))
+      }
+    }
+  }
+  
+  return {
+    insights: ["You're building consistency!", "Keep tracking daily"],
+    recommendations: ["Try completing habits at the same time", "Celebrate small wins"],
+    bestTime: "Anytime",
+    patterns: ["Developing your routine"]
   }
 }
 
-/**
- * Generate streak risk alert message with improved prompt
- */
 export async function generateStreakAlert(
   habitName: string,
   streakDays: number,
   lastCompletion: string,
   preferredTime?: string
 ): Promise<string> {
-  try {
-    const ai = getGenAI()
+  console.log("\n🎯 generateStreakAlert called for:", habitName, "streak:", streakDays)
+  
+  const prompt = `Urgent message (max 100 chars) for ${streakDays}-day streak on "${habitName}" at risk. Be motivating! Use 1 emoji.`
 
-    const prompt = `You are a motivational coach. Generate an urgent but encouraging message for someone at risk of breaking their streak.
-
-Context:
-- Habit: "${habitName}"
-- Current streak: ${streakDays} days
-- Last completed: ${lastCompletion}
-${preferredTime ? `- Preferred time: ${preferredTime}` : ''}
-
-Requirements:
-- Maximum 100 characters
-- Urgent but encouraging tone
-- Reference their streak to create urgency
-- Motivating and time-sensitive
-- Use 0-1 emoji max
-- No quotes, no markdown, just the message text
-
-Generate the alert message now:`
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt
-    })
-    
-    const text = response.text?.trim() || ""
-    const cleaned = cleanAIResponse(text, 100)
-    
-    return cleaned || `Don't break your ${streakDays}-day streak on ${habitName}! You've got this! 🔥`
-  } catch (error) {
-    console.error("Error generating streak alert:", error)
-    return `Don't break your ${streakDays}-day streak on ${habitName}! You've got this! 🔥`
+  const result = await callAI(prompt)
+  
+  if (result) {
+    return cleanAIResponse(result, 100)
   }
+  
+  return `Your ${streakDays}-day streak on ${habitName} is waiting! 🔥`
 }
 
-/**
- * Generate weekly/monthly progress report with improved prompt
- */
 export async function generateProgressReport(
   period: 'weekly' | 'monthly',
   stats: {
@@ -438,73 +409,29 @@ export async function generateProgressReport(
   encouragement: string
   nextSteps: string[]
 }> {
-  try {
-    const ai = getGenAI()
+  console.log("\n🎯 generateProgressReport called for:", period)
+  
+  const prompt = `Create ${period} report for ${stats.totalCompletions} completions, ${stats.completionRate}% rate, ${stats.streaks.length} streaks.
+Return JSON: {"summary":"text","achievements":["ach1"],"encouragement":"text","nextSteps":["step1"]}`
 
-    const prompt = `You are a progress coach. Generate a ${period} progress report based on the user's stats.
-
-Stats:
-- Total completions: ${stats.totalCompletions}
-- Active streaks: ${stats.streaks.length} (${stats.streaks.join(", ")} days)
-- Completion rate: ${stats.completionRate}%
-- Top performing habits: ${stats.topHabits.join(", ") || "None yet"}
-- Areas of improvement: ${stats.improvements.join(", ") || "None identified"}
-
-Task: Create an encouraging ${period} report.
-
-Requirements:
-- Summary: 2-3 sentences highlighting key achievements (max 200 chars)
-- Achievements: 3-5 specific accomplishments (max 80 chars each)
-- Encouragement: A motivating message (max 120 chars)
-- Next steps: 2-3 actionable recommendations (max 80 chars each)
-
-Return ONLY a valid JSON object in this exact format (no markdown, no code blocks):
-{
-  "summary": "Brief summary of progress",
-  "achievements": ["achievement 1", "achievement 2"],
-  "encouragement": "Encouraging message",
-  "nextSteps": ["step 1", "step 2"]
-}`
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt
-    })
-    
-    let text = response.text?.trim() || ""
-    const report = safeJSONParse<{
-      summary: string
-      achievements: string[]
-      encouragement: string
-      nextSteps: string[]
-    }>(text, {
-      summary: "",
-      achievements: [],
-      encouragement: "",
-      nextSteps: []
-    })
-    
-    // Validate and sanitize
-    return {
-      summary: report.summary?.substring(0, 200) || `Great progress this ${period}!`,
-      achievements: (Array.isArray(report.achievements) ? report.achievements : []).slice(0, 5).map(a => a.substring(0, 80)),
-      encouragement: report.encouragement?.substring(0, 120) || "Keep up the amazing work!",
-      nextSteps: (Array.isArray(report.nextSteps) ? report.nextSteps : []).slice(0, 3).map(s => s.substring(0, 80))
+  const result = await callAI(prompt)
+  
+  if (result) {
+    const report = safeJSONParse<any>(result, null)
+    if (report) {
+      return {
+        summary: String(report.summary || "").substring(0, 200) || `Great ${period}!`,
+        achievements: (report.achievements || []).slice(0, 5).map((a: any) => String(a).substring(0, 80)),
+        encouragement: String(report.encouragement || "").substring(0, 120) || "Keep going!",
+        nextSteps: (report.nextSteps || []).slice(0, 3).map((s: any) => String(s).substring(0, 80))
+      }
     }
-  } catch (error) {
-    console.error("Error generating progress report:", error)
-    // Return fallback report
-    return {
-      summary: `You completed ${stats.totalCompletions} habits this ${period}!`,
-      achievements: [
-        `Maintained ${stats.streaks.length} active streak${stats.streaks.length !== 1 ? 's' : ''}`,
-        `Achieved ${stats.completionRate}% completion rate`
-      ],
-      encouragement: "Keep building on this momentum!",
-      nextSteps: [
-        "Continue tracking your habits daily",
-        "Focus on maintaining your streaks"
-      ]
-    }
+  }
+  
+  return {
+    summary: `You completed ${stats.totalCompletions} habits this ${period}!`,
+    achievements: [`Maintained ${stats.streaks.length} streaks`, `${stats.completionRate}% completion`],
+    encouragement: "Keep building on this success!",
+    nextSteps: ["Continue daily tracking"]
   }
 }

@@ -1,5 +1,6 @@
 // Custom hooks for AI features with React Query caching
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { toast } from "react-hot-toast"
 
 // Cache keys
@@ -117,6 +118,8 @@ export function useAISuggestHabits(
         description: string
         category: string
         reason: string
+        insight?: string
+        funFact?: string
       }>
     },
     enabled: enabled && !!userId,
@@ -306,5 +309,131 @@ export function useAIMotivationalMessageLegacy() {
     },
     isLoading: false,
     message: null,
+  }
+}
+
+/**
+ * Legacy hook for habit suggestions with manual trigger
+ */
+export function useAISuggestHabitsLegacy() {
+  const queryClient = useQueryClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [suggestions, setSuggestions] = useState<Array<{
+    name: string
+    description: string
+    category: string
+    reason: string
+    insight?: string
+    funFact?: string
+  }>>([])
+  
+  return {
+    suggest: async (currentHabits: Array<{ name: string; category: string }>, userGoals?: string) => {
+      const habitsHash = createHash({ habits: currentHabits, goals: userGoals })
+      const queryKey = ['ai', 'habit-suggestions', 'legacy', habitsHash]
+      
+      // Re-enabled caching to reduce API calls and avoid rate limits
+      const cached = queryClient.getQueryData<typeof suggestions>(queryKey)
+      if (cached) {
+        console.log("✅ Using cached suggestions (saving API quota)")
+        setSuggestions(cached)
+        return cached
+      }
+      
+      console.log("🔄 Fetching fresh AI suggestions...")
+      setIsLoading(true)
+      try {
+        // Fetch if not cached
+        const response = await fetch("/api/ai/suggest-habits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentHabits, userGoals }),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to suggest habits")
+        }
+
+        const data = await response.json()
+        const newSuggestions = data.suggestions
+        
+        // Cache the result
+        queryClient.setQueryData(queryKey, newSuggestions)
+        setSuggestions(newSuggestions)
+        
+        return newSuggestions
+      } catch (error) {
+        console.error("Error suggesting habits:", error)
+        toast.error("Failed to generate suggestions. Please try again.")
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    isLoading,
+    suggestions,
+  }
+}
+
+/**
+ * Legacy hook for pattern analysis with manual trigger
+ */
+export function useAIAnalyzePatternsLegacy() {
+  const queryClient = useQueryClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [analysis, setAnalysis] = useState<{
+    insights: string[]
+    recommendations: string[]
+    bestTime: string
+    patterns: string[]
+  } | null>(null)
+  
+  return {
+    analyze: async (completions: Array<{
+      date: string
+      time: string
+      mood?: number
+      energy?: number
+      habitName: string
+    }>) => {
+      const completionsHash = createHash(completions.slice(-50))
+      const queryKey = ['ai', 'pattern-analysis', 'legacy', completionsHash]
+      
+      // Check cache first
+      const cached = queryClient.getQueryData<typeof analysis>(queryKey)
+      if (cached) {
+        setAnalysis(cached)
+        return cached
+      }
+      
+      setIsLoading(true)
+      try {
+        const response = await fetch("/api/ai/analyze-patterns", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completions }),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to analyze patterns")
+        }
+
+        const data = await response.json()
+        const newAnalysis = data.analysis
+        
+        // Cache the result
+        queryClient.setQueryData(queryKey, newAnalysis)
+        setAnalysis(newAnalysis)
+        
+        return newAnalysis
+      } catch (error) {
+        console.error("Error analyzing patterns:", error)
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    isLoading,
+    analysis,
   }
 }

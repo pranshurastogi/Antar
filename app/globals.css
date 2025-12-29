@@ -3,6 +3,51 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Mobile Touch Optimization */
+@layer base {
+  /* Ensure minimum touch target size of 44x44px for mobile */
+  button, 
+  a, 
+  input[type="button"], 
+  input[type="submit"], 
+  input[type="checkbox"], 
+  input[type="radio"],
+  select {
+    touch-action: manipulation;
+  }
+  
+  /* Improve tap highlighting */
+  * {
+    -webkit-tap-highlight-color: rgba(38, 84, 124, 0.1);
+  }
+  
+  /* Better mobile scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent text size adjustment on mobile */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Better mobile input handling - prevents zoom on iOS */
+  input, 
+  textarea, 
+  select {
+    font-size: 16px;
+  }
+  
+  @media (max-width: 640px) {
+    /* Ensure minimum touch targets on mobile */
+    button:not(.no-min-height),
+    a:not(.no-min-height) {
+      min-height: 44px;
+    }
+  }
+}
+
 :root {
   /* Coolors Theme - Light (#26547C, #EF476F, #FFD166, #06D6A0, #FCFCFC) */
   --background: 252 252 252; /* #FCFCFC - White */

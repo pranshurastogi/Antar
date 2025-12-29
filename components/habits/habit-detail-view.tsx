@@ -2,9 +2,8 @@
 
 import { useHabit } from "@/lib/hooks/useHabits"
 import { useCompletions } from "@/lib/hooks/useCompletions"
-import { useAIAnalyzePatterns } from "@/lib/hooks/useAI"
+import { useAIAnalyzePatternsLegacy } from "@/lib/hooks/useAI"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -17,7 +16,7 @@ import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 import { HabitFormContent } from "@/components/habits/habit-form"
-import { Spinner } from "@/components/ui/spinner"
+import { FunLoader } from "@/components/ui/fun-loader"
 import "@/components/habits/notebook-theme.css"
 
 interface HabitDetailViewProps {
@@ -38,7 +37,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
   const router = useRouter()
   const { data: habit, isLoading, error } = useHabit(habitId, userId)
   const { data: allCompletions } = useCompletions(userId)
-  const { analyze, isLoading: aiAnalyzing, analysis } = useAIAnalyzePatterns()
+  const { analyze, isLoading: aiAnalyzing, analysis } = useAIAnalyzePatternsLegacy()
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [showEditDialog, setShowEditDialog] = useState(isEditMode)
   const [insightsLoaded, setInsightsLoaded] = useState(false)
@@ -85,9 +84,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <Skeleton className="h-64 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
+        <FunLoader message="Loading your habit details..." />
       </motion.div>
     )
   }
@@ -540,7 +537,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
         </Card>
       </motion.div>
 
-      {/* AI Insights - Notebook Style */}
+      {/* Notebook Insights - Notebook Style */}
       {habit && recentCompletions.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -549,13 +546,13 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
           className="notebook-container relative"
         >
           <div className="sticker teal" style={{ top: '10px', right: '20px' }}>
-            🤖 AI Insights
+            📝 Notebook Insights
           </div>
           <Card className="border-2 border-[#26547C]/30 dark:border-[#60A5FA]/30 shadow-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
             <CardHeader className="bg-gradient-to-r from-[#06D6A0]/10 via-[#26547C]/10 to-[#EF476F]/10 dark:from-[#06D6A0]/20 dark:via-[#26547C]/20 dark:to-[#EF476F]/20 border-b-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
               <div className="flex items-center gap-2">
                 <FontAwesomeIcon icon={Icons.brain} className="h-5 w-5 text-[#26547C] dark:text-[#60A5FA]" />
-                <CardTitle className="handwritten-title text-xl sm:text-2xl">AI-Powered Insights</CardTitle>
+                <CardTitle className="handwritten-title text-xl sm:text-2xl">Smart Notebook Insights</CardTitle>
               </div>
               <CardDescription className="handwritten-text">Discover patterns and optimize your habit journey</CardDescription>
             </CardHeader>
@@ -632,7 +629,7 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
                 <Alert className="bg-[#FFD166]/10 border-[#FFD166]">
                   <FontAwesomeIcon icon={Icons.circleInfo} className="h-4 w-4" />
                   <AlertDescription className="handwritten-text">
-                    Complete more habits to unlock AI insights! 🚀
+                    Complete more habits to unlock notebook insights! 🚀
                   </AlertDescription>
                 </Alert>
               )}

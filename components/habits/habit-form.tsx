@@ -206,17 +206,17 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
               }
             }}
             disabled={aiDescriptionLoading || !watch('name')}
-            className="flex items-center gap-2 text-xs text-[#26547C] dark:text-[#60A5FA] hover:text-[#26547C]/80 dark:hover:text-[#60A5FA]/80 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 text-xs sm:text-sm text-[#26547C] dark:text-[#60A5FA] hover:text-[#26547C]/80 dark:hover:text-[#60A5FA]/80 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] px-3 py-2 touch-manipulation"
           >
             {aiDescriptionLoading ? (
               <>
-                <Spinner className="h-3 w-3" />
+                <Spinner className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <FontAwesomeIcon icon={Icons.sparkles} className="h-3 w-3" />
-                <span>AI Generate</span>
+                <FontAwesomeIcon icon={Icons.sparkles} className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Notebook Generate</span>
               </>
             )}
           </button>
@@ -232,7 +232,7 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
       {/* Category */}
       <div className="space-y-2">
         <Label>Category *</Label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {CATEGORY_OPTIONS.map((cat) => (
             <button
               key={cat.value}
@@ -243,14 +243,14 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
                 setValue('color', cat.color)
                 setValue('icon', cat.icon)
               }}
-              className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+              className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg border-2 transition-all min-h-[80px] touch-manipulation ${
                 selectedCategory === cat.value
                   ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 hover:border-gray-300 active:border-indigo-400'
               }`}
             >
-              <span className="text-2xl mb-1">{cat.icon}</span>
-              <span className="text-xs font-medium">{cat.label}</span>
+              <span className="text-2xl sm:text-3xl mb-1">{cat.icon}</span>
+              <span className="text-xs sm:text-sm font-medium">{cat.label}</span>
             </button>
           ))}
         </div>
@@ -275,16 +275,16 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
             This habit will be scheduled every day
           </TabsContent>
           <TabsContent value="specific_days" className="space-y-2 mt-2">
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2">
               {DAYS.map((day, index) => (
                 <button
                   key={day}
                   type="button"
                   onClick={() => toggleDay(index)}
-                  className={`flex-1 py-2 px-1 text-xs rounded-md border transition-all ${
+                  className={`flex-1 py-2 sm:py-3 px-1 text-xs sm:text-sm rounded-md border transition-all min-h-[44px] touch-manipulation ${
                     selectedDays.includes(index)
                       ? 'bg-indigo-600 text-white border-indigo-600'
-                      : 'border-gray-300 hover:border-indigo-300'
+                      : 'border-gray-300 hover:border-indigo-300 active:bg-indigo-50'
                   }`}
                 >
                   {day}
@@ -325,7 +325,7 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
       {/* Difficulty */}
       <div className="space-y-2">
         <Label>Difficulty *</Label>
-        <div className="grid grid-cols-3 gap-1 sm:gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {[
             { value: 'easy', label: 'Easy', xp: 10, color: 'bg-green-100 border-green-500 text-green-700' },
             { value: 'medium', label: 'Medium', xp: 20, color: 'bg-yellow-100 border-yellow-500 text-yellow-700' },
@@ -335,14 +335,14 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
               key={diff.value}
               type="button"
               onClick={() => setSelectedDifficulty(diff.value as any)}
-              className={`p-3 rounded-lg border-2 transition-all ${
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] touch-manipulation ${
                 selectedDifficulty === diff.value
                   ? diff.color
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 hover:border-gray-300 active:bg-gray-50'
               }`}
             >
-              <div className="font-medium text-sm">{diff.label}</div>
-              <div className="text-xs">+{diff.xp} XP</div>
+              <div className="font-medium text-sm sm:text-base">{diff.label}</div>
+              <div className="text-xs sm:text-sm">+{diff.xp} XP</div>
             </button>
           ))}
         </div>
@@ -351,8 +351,9 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
       {/* Submit */}
       <Button
         type="submit"
-        className="w-full bg-indigo-600 hover:bg-indigo-700"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 min-h-[48px] text-base touch-manipulation"
         disabled={isEditMode ? updateHabit.isPending : createHabit.isPending}
+        size="lg"
       >
         {isEditMode 
           ? (updateHabit.isPending ? 'Updating...' : 'Update Habit')

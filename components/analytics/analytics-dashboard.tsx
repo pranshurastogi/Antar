@@ -247,7 +247,7 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
         </Card>
       </div>
 
-      {/* AI Insights Section */}
+      {/* Notebook Insights Section */}
       {completions && completions.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -256,14 +256,14 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
           className="notebook-container relative"
         >
           <div className="sticker teal" style={{ top: '10px', right: '10px', zIndex: 20 }}>
-            🤖 AI Insights
+            📝 Notebook Insights
           </div>
           <Card className="border-2 border-[#26547C]/30 dark:border-[#60A5FA]/30 shadow-xl bg-white/95 dark:bg-slate-900/95">
             <CardHeader className="bg-gradient-to-r from-[#06D6A0]/10 via-[#26547C]/10 to-[#EF476F]/10 dark:from-[#06D6A0]/20 dark:via-[#26547C]/20 dark:to-[#EF476F]/20 border-b-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
               <div className="flex items-center gap-2">
                 <FontAwesomeIcon icon={Icons.brain} className="h-5 w-5 text-[#26547C] dark:text-[#60A5FA]" />
                 <CardTitle className="handwritten-title text-xl sm:text-2xl text-[#26547C] dark:text-[#60A5FA]">
-                  AI-Powered Pattern Analysis
+                  Smart Notebook Pattern Analysis
                 </CardTitle>
               </div>
               <CardDescription className="handwritten-text">
@@ -343,7 +343,7 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
                 <Alert className="bg-[#FFD166]/10 border-[#FFD166]">
                   <FontAwesomeIcon icon={Icons.circleInfo} className="h-4 w-4" />
                   <AlertDescription className="handwritten-text">
-                    Complete more habits to unlock AI insights! 🚀
+                    Complete more habits to unlock notebook insights! 🚀
                   </AlertDescription>
                 </Alert>
               )}

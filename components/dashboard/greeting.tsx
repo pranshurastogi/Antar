@@ -3,7 +3,7 @@
 import { useProfile, useDashboardStats } from "@/lib/hooks/useProfile"
 import { useAIMotivationalMessageLegacy } from "@/lib/hooks/useAI"
 import { getTimeBasedGreeting } from "@/lib/utils/dates"
-import { Skeleton } from "@/components/ui/skeleton"
+import { FunLoader } from "@/components/ui/fun-loader"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -93,8 +93,8 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
 
   if (isLoading) {
     return (
-      <div className="notebook-container bg-white/95 dark:bg-slate-900/95 rounded-lg p-4 border-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
-        <Skeleton className="h-16 sm:h-20 w-full rounded-lg" />
+      <div className="notebook-container bg-white/95 dark:bg-slate-900/95 rounded-lg p-4 sm:p-6 border-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
+        <FunLoader message="Loading your personalized greeting..." size="sm" />
       </div>
     )
   }

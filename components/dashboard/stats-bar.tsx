@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Icons } from "@/lib/icons"
-import { Skeleton } from "@/components/ui/skeleton"
+import { FunLoader } from "@/components/ui/fun-loader"
 import { levelProgress } from "@/lib/utils/xp"
 import { motion } from "framer-motion"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -19,10 +19,8 @@ export function DashboardStats({ userId }: DashboardStatsProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-20 sm:h-24 md:h-28 rounded-lg" />
-        ))}
+      <div className="w-full">
+        <FunLoader message="Calculating your awesome stats..." size="sm" />
       </div>
     )
   }
