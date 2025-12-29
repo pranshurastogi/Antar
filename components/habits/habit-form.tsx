@@ -64,6 +64,8 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
   const [selectedCategory, setSelectedCategory] = useState(initialData?.category || 'health')
   const [selectedDifficulty, setSelectedDifficulty] = useState(initialData?.difficulty_level || 'medium')
   const [duration, setDuration] = useState([initialData?.estimated_duration || 30])
+  const [selectedIcon, setSelectedIcon] = useState(initialData?.icon || categoryData?.icon || '✨')
+  const [iconManuallyChanged, setIconManuallyChanged] = useState(!!initialData?.icon)
 
   const categoryData = CATEGORY_OPTIONS.find(c => c.value === selectedCategory)
 
@@ -80,7 +82,7 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
       description: initialData?.description || '',
       category: initialData?.category || 'health',
       color: initialData?.color || categoryData?.color || '#6366f1',
-      icon: initialData?.icon || categoryData?.icon || '✨',
+      icon: selectedIcon,
       frequency_type: initialData?.frequency_type || 'daily',
       difficulty_level: initialData?.difficulty_level || 'medium',
       estimated_duration: initialData?.estimated_duration || 30,
@@ -91,26 +93,31 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
   // Watch category to update icon and color when it changes
   const watchedCategory = watch('category')
 
-  // Update icon and color when category changes
+  // Update icon and color when category changes (only if icon hasn't been manually changed)
   useEffect(() => {
     const newCategoryData = CATEGORY_OPTIONS.find(c => c.value === selectedCategory)
     if (newCategoryData) {
       setValue('category', selectedCategory as any)
       setValue('color', newCategoryData.color)
-      setValue('icon', newCategoryData.icon)
+      // Only auto-update icon if user hasn't manually changed it
+      if (!iconManuallyChanged) {
+        setValue('icon', newCategoryData.icon)
+        setSelectedIcon(newCategoryData.icon)
+      }
     }
-  }, [selectedCategory, setValue])
+  }, [selectedCategory, setValue, iconManuallyChanged])
 
   const onSubmit = async (data: HabitFormData) => {
     try {
-      // Ensure we use the selected category, icon, and color (in case form state is out of sync)
+      // Use the actual selected values from state, not form defaults
       const finalCategory = selectedCategory || data.category
       const categoryInfo = CATEGORY_OPTIONS.find(c => c.value === finalCategory)
       const finalData = {
         ...data,
         category: finalCategory as any,
-        icon: categoryInfo?.icon || data.icon,
+        icon: selectedIcon, // Use the selected icon from state
         color: categoryInfo?.color || data.color,
+        difficulty_level: selectedDifficulty as any, // Use the selected difficulty from state
       }
 
       // Build frequency config based on type (must be JSONB)
@@ -122,14 +129,20 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
       }
 
       if (isEditMode && habitId) {
-        // Update existing habit
+        // Update existing habit - explicitly include all fields
         await updateHabit.mutateAsync({
           id: habitId,
           updates: {
-            ...finalData,
+            name: finalData.name,
+            description: finalData.description || null,
+            category: finalData.category,
+            color: finalData.color,
+            icon: finalData.icon, // Explicitly include icon
+            frequency_type: finalData.frequency_type,
             frequency_config: frequencyConfig,
             preferred_time: finalData.preferred_time || null,
             estimated_duration: duration[0] || null,
+            difficulty_level: finalData.difficulty_level, // Explicitly include difficulty_level
             xp_value: getXpForDifficulty(finalData.difficulty_level),
           },
         })
@@ -241,7 +254,11 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
                 setSelectedCategory(cat.value as any)
                 setValue('category', cat.value as any)
                 setValue('color', cat.color)
-                setValue('icon', cat.icon)
+                // Only auto-set icon if user hasn't manually changed it
+                if (!iconManuallyChanged) {
+                  setValue('icon', cat.icon)
+                  setSelectedIcon(cat.icon)
+                }
               }}
               className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg border-2 transition-all min-h-[80px] touch-manipulation ${
                 selectedCategory === cat.value
@@ -251,6 +268,50 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
             >
               <span className="text-2xl sm:text-3xl mb-1">{cat.icon}</span>
               <span className="text-xs sm:text-sm font-medium">{cat.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Icon Picker */}
+      <div className="space-y-2">
+        <Label>Icon</Label>
+        <div className="flex items-center gap-4 mb-3">
+          <div className="flex items-center justify-center w-16 h-16 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+            <span className="text-4xl">{selectedIcon}</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm text-muted-foreground">Choose a custom icon for your habit</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-8 sm:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto p-2 border rounded-lg bg-gray-50 dark:bg-gray-900">
+          {[
+            '💪', '🏃', '🧘', '📚', '🎯', '💧', '🍎', '🥗',
+            '🏋️', '🚶', '🧠', '📖', '✍️', '🎨', '🎵', '🎬',
+            '🌱', '🌳', '☀️', '🌙', '⭐', '🔥', '💎', '🎁',
+            '📝', '✅', '🎉', '💯', '🏆', '🌟', '✨', '💫',
+            '🔋', '⚡', '💡', '🎊', '🎈', '🎪', '🎭', '🎨',
+            '🏠', '🌍', '🗺️', '📱', '💻', '⌚', '📊', '📈',
+            '🧪', '🔬', '🌡️', '💊', '🏥', '❤️', '💚', '💙',
+            '🧩', '🎲', '🃏', '🎴', '🖼️', '📷', '🎥', '🎞️',
+            '🎤', '🎧', '🎸', '🎹', '🥁', '🎺', '🎷', '🎻',
+            '🏀', '⚽', '🎾', '🏐', '🏓', '🏸', '🥊', '🤸',
+          ].map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              onClick={() => {
+                setSelectedIcon(emoji)
+                setValue('icon', emoji)
+                setIconManuallyChanged(true)
+              }}
+              className={`text-2xl sm:text-3xl p-2 rounded-lg transition-all hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-90 touch-manipulation ${
+                selectedIcon === emoji
+                  ? 'bg-indigo-100 dark:bg-indigo-900 ring-2 ring-indigo-500'
+                  : ''
+              }`}
+            >
+              {emoji}
             </button>
           ))}
         </div>
@@ -334,7 +395,10 @@ export function HabitFormContent({ userId, onSuccess, initialData, habitId, isEd
             <button
               key={diff.value}
               type="button"
-              onClick={() => setSelectedDifficulty(diff.value as any)}
+              onClick={() => {
+                setSelectedDifficulty(diff.value as any)
+                setValue('difficulty_level', diff.value as any)
+              }}
               className={`p-3 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] touch-manipulation ${
                 selectedDifficulty === diff.value
                   ? diff.color

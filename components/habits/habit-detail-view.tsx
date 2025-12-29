@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 import { HabitFormContent } from "@/components/habits/habit-form"
 import { FunLoader } from "@/components/ui/fun-loader"
+import { Spinner } from "@/components/ui/spinner"
 import "@/components/habits/notebook-theme.css"
 
 interface HabitDetailViewProps {
@@ -238,14 +239,15 @@ export function HabitDetailView({ habitId, userId, isEditMode }: HabitDetailView
         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
           <Button
             variant="outline"
+            size="icon"
             className="bg-white dark:bg-slate-900 border-2 border-[#26547C] dark:border-[#60A5FA]"
             onClick={() => {
               setShowEditDialog(true)
               router.push(`/dashboard/habits/${habitId}?edit=true`)
             }}
+            title="Edit habit"
           >
-            <FontAwesomeIcon icon={Icons.edit} className="h-4 w-4 mr-2" />
-            Edit
+            <FontAwesomeIcon icon={Icons.edit} className="h-5 w-5" />
           </Button>
         </motion.div>
       </motion.div>
