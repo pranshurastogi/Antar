@@ -16,6 +16,7 @@ import type { HabitWithRelations } from "@/lib/types/database"
 import { isTimePassedToday, formatDate } from "@/lib/utils/dates"
 import { useArchiveHabit } from "@/lib/hooks/useHabits"
 import { toast } from "react-hot-toast"
+import "@/components/habits/notebook-theme.css"
 
 interface HabitCardProps {
   habit: HabitWithRelations
@@ -69,12 +70,17 @@ export function HabitCard({ habit, isCompleted, onToggle }: HabitCardProps) {
       >
         <Card
           className={cn(
-            "transition-all duration-300 relative overflow-hidden border-2 bg-white dark:bg-slate-900",
-            isCompleted && "bg-gradient-to-br from-[#06D6A0]/20 via-[#06D6A0]/10 to-[#06D6A0]/5 dark:from-[#06D6A0]/30 dark:via-[#06D6A0]/20 dark:to-[#06D6A0]/10 border-[#06D6A0] dark:border-[#06D6A0]/70 shadow-lg",
-            !isCompleted && isOverdue && "border-[#FFD166] dark:border-[#FFD166]/70 bg-gradient-to-br from-[#FFD166]/10 to-[#FFD166]/5 dark:from-[#FFD166]/20 dark:to-[#FFD166]/10",
-            !isCompleted && !isOverdue && "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-[#26547C] dark:hover:border-[#60A5FA] hover:shadow-xl"
+            "notebook-entry transition-all duration-300 relative overflow-hidden border-2",
+            // Completed - Teal/Green theme
+            isCompleted && "bg-gradient-to-br from-[#06D6A0]/15 via-white to-[#06D6A0]/10 dark:from-[#06D6A0]/25 dark:via-slate-900 dark:to-[#06D6A0]/15 border-[#06D6A0]/40 dark:border-[#34D399]/50 shadow-lg",
+            // Overdue - Yellow/Orange theme
+            !isCompleted && isOverdue && "bg-gradient-to-br from-[#FFD166]/15 via-white to-[#FFD166]/10 dark:from-[#FFD166]/25 dark:via-slate-900 dark:to-[#FFD166]/15 border-[#FFD166]/40 dark:border-[#FFD166]/50",
+            // Normal - Blue theme (today's habits)
+            !isCompleted && !isOverdue && "bg-gradient-to-br from-[#26547C]/10 via-white to-[#26547C]/5 dark:from-[#26547C]/20 dark:via-slate-900 dark:to-[#26547C]/10 border-[#26547C]/30 dark:border-[#60A5FA]/40 hover:border-[#26547C]/50 dark:hover:border-[#60A5FA]/60 hover:shadow-xl"
           )}
         >
+          {/* Paper clip decoration */}
+          <div className="paper-clip" />
           {/* Completion indicator bar */}
           <AnimatePresence>
             {isCompleted && (
@@ -110,8 +116,10 @@ export function HabitCard({ habit, isCompleted, onToggle }: HabitCardProps) {
                   <div className="flex items-center gap-2 mb-1">
                     <h3
                       className={cn(
-                        "font-bold text-base sm:text-lg leading-tight",
+                        "handwritten-text font-bold text-base sm:text-lg leading-tight",
                         isCompleted && "text-muted-foreground line-through",
+                        !isCompleted && isOverdue && "text-[#FFD166]",
+                        !isCompleted && !isOverdue && "text-[#26547C] dark:text-[#60A5FA]"
                       )}
                     >
                       {habit.name}
@@ -129,7 +137,7 @@ export function HabitCard({ habit, isCompleted, onToggle }: HabitCardProps) {
                     </AnimatePresence>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-xs bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                    <Badge variant="outline" className="handwritten-label text-xs bg-white/80 dark:bg-slate-800/80 border-[#26547C]/20 dark:border-[#60A5FA]/20">
                       {habit.category}
                     </Badge>
                     {currentStreak > 0 && (
