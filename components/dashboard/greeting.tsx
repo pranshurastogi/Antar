@@ -5,6 +5,9 @@ import { getTimeBasedGreeting } from "@/lib/utils/dates"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Icons } from "@/lib/icons"
 
 interface DashboardGreetingProps {
   userId: string
@@ -24,7 +27,7 @@ const motivationalMessages = [
 ]
 
 export function DashboardGreeting({ userId }: DashboardGreetingProps) {
-  const { data: profile, isLoading } = useProfile(userId)
+  const { data: profile, isLoading, error } = useProfile(userId)
   const greeting = getTimeBasedGreeting()
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
   const [displayName, setDisplayName] = useState<string>('Friend')
@@ -45,7 +48,22 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
   }, [])
 
   if (isLoading) {
-    return <Skeleton className="h-20 w-full rounded-lg" />
+    return (
+      <div className="notebook-container bg-white/95 dark:bg-slate-900/95 rounded-lg p-4 border-2 border-[#26547C]/20 dark:border-[#60A5FA]/20">
+        <Skeleton className="h-16 sm:h-20 w-full rounded-lg" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Alert className="bg-[#EF476F]/10 border-[#EF476F] dark:bg-[#EF476F]/20 dark:border-[#FB7185]">
+        <FontAwesomeIcon icon={Icons.circleExclamation} className="h-4 w-4" />
+        <AlertDescription className="handwritten-text">
+          Oops! Couldn't load your profile. Don't worry, you can still use the app!
+        </AlertDescription>
+      </Alert>
+    )
   }
 
   const currentMessage = motivationalMessages[currentMessageIndex]
@@ -55,10 +73,10 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-2 sm:space-y-3"
+      className="notebook-container bg-white/95 dark:bg-slate-900/95 rounded-lg p-4 sm:p-6 border-2 border-[#26547C]/20 dark:border-[#60A5FA]/20 shadow-lg relative"
     >
       <motion.h1
-        className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+        className="handwritten-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#26547C] dark:text-[#60A5FA] mb-2 sm:mb-3"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
@@ -85,7 +103,7 @@ export function DashboardGreeting({ userId }: DashboardGreetingProps) {
         <AnimatePresence mode="wait">
           <motion.p
             key={currentMessageIndex}
-            className="text-sm sm:text-base md:text-lg text-muted-foreground absolute inset-0"
+            className="handwritten-text text-sm sm:text-base md:text-lg text-muted-foreground absolute inset-0"
             initial={{ opacity: 0, y: 20, x: -10 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             exit={{ opacity: 0, y: -20, x: 10 }}

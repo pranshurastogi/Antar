@@ -9,6 +9,7 @@ import { PetWidget } from "@/components/gamification/pet-widget"
 import { StreakCalendar } from "@/components/habits/streak-calendar"
 import { XPBar } from "@/components/gamification/xp-bar"
 import { MobileNav } from "@/components/mobile-nav"
+import "@/components/habits/notebook-theme.css"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -17,36 +18,71 @@ export default async function DashboardPage() {
     data: { user },
     error,
   } = await supabase.auth.getUser()
+  
   if (error || !user) {
     redirect("/auth/login")
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-200px)] flex-col bg-gradient-to-br from-pink-50 via-blue-50 via-purple-50 to-cyan-50 dark:from-slate-950 dark:via-blue-950/30 dark:via-purple-950/30 dark:to-pink-950/30 p-3 sm:p-4 md:p-6 lg:p-8 pb-24 sm:pb-28 md:pb-32">
+    <main className="flex min-h-[calc(100vh-200px)] flex-col notebook-container relative p-2 sm:p-4 md:p-6 lg:p-8 pb-20 sm:pb-24 md:pb-28">
+      {/* Background decorations */}
+      <div className="scribble-decoration scribble-1" style={{ top: '5%', right: '2%' }} />
+      <div className="scribble-decoration scribble-2" style={{ bottom: '10%', left: '3%' }} />
+      
       <DashboardHeader user={user} />
 
-      <div className="mt-4 sm:mt-6 md:mt-8 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto w-full">
-        {/* Greeting */}
-        <DashboardGreeting userId={user.id} />
+      <div className="mt-2 sm:mt-4 md:mt-6 space-y-3 sm:space-y-4 md:space-y-6 max-w-7xl mx-auto w-full relative z-10">
+        {/* Greeting with sticker */}
+        <div className="relative">
+          <div className="sticker blue" style={{ top: '-8px', right: '5px', zIndex: 20 }}>
+            📅 Today
+          </div>
+          <DashboardGreeting userId={user.id} />
+        </div>
 
-        {/* Today's Habits - Moved to top */}
-        <section>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mb-4 sm:mb-5 md:mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        {/* Today's Habits - Notebook Style */}
+        <section className="relative">
+          <div className="sticker teal" style={{ top: '-8px', left: '5px', zIndex: 20 }}>
+            ✅ Habits
+          </div>
+          <h2 className="handwritten-title text-xl sm:text-2xl md:text-3xl lg:text-4xl mb-2 sm:mb-3 md:mb-4 text-[#26547C] dark:text-[#60A5FA] pl-2">
             Today's Habits
           </h2>
-          <HabitList userId={user.id} />
+          <div className="notebook-container bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-lg p-2 sm:p-3 md:p-4 lg:p-6 border-2 border-[#26547C]/20 dark:border-[#60A5FA]/20 shadow-lg">
+            <HabitList userId={user.id} />
+          </div>
         </section>
 
         {/* XP Bar */}
-        <XPBar userId={user.id} />
+        <div className="relative">
+          <div className="sticker pink" style={{ top: '-8px', right: '5px', zIndex: 20 }}>
+            ⭐ XP
+          </div>
+          <XPBar userId={user.id} />
+        </div>
 
         {/* Stats Bar */}
-        <DashboardStats userId={user.id} />
+        <div className="relative">
+          <div className="sticker" style={{ top: '-8px', left: '5px', zIndex: 20 }}>
+            📊 Stats
+          </div>
+          <DashboardStats userId={user.id} />
+        </div>
 
         {/* Pet Widget & Streak Calendar */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <PetWidget userId={user.id} />
-          <StreakCalendar userId={user.id} months={3} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+          <div className="relative">
+            <div className="sticker teal" style={{ top: '-8px', right: '5px', zIndex: 20 }}>
+              🐾 Pet
+            </div>
+            <PetWidget userId={user.id} />
+          </div>
+          <div className="relative">
+            <div className="sticker pink" style={{ top: '-8px', left: '5px', zIndex: 20 }}>
+              🔥 Streak
+            </div>
+            <StreakCalendar userId={user.id} />
+          </div>
         </div>
       </div>
 
