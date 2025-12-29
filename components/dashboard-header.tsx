@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
-import { BarChart3, Trophy, BookTemplate, Home } from "lucide-react"
+import { BarChart3, Trophy, BookTemplate, Home, Crown, Settings } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { BackButton } from "@/components/ui/back-button"
@@ -89,14 +89,14 @@ export function DashboardHeader({ user }: { user: User }) {
               Achievements
             </Button>
           </Link>
-          <Link href="/dashboard/templates">
+          <Link href="/dashboard/leaderboard">
             <Button 
-              variant={pathname === "/dashboard/templates" ? "secondary" : "ghost"} 
+              variant={pathname === "/dashboard/leaderboard" ? "secondary" : "ghost"} 
               size="sm"
               className="text-sm font-medium"
             >
-              <BookTemplate className="h-4 w-4 mr-2" />
-              Templates
+              <Crown className="h-4 w-4 mr-2" />
+              Leaderboard
             </Button>
           </Link>
         </nav>
@@ -113,7 +113,17 @@ export function DashboardHeader({ user }: { user: User }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/templates" className="flex items-center cursor-pointer">
+              <BookTemplate className="h-4 w-4 mr-2" />
+              Templates
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

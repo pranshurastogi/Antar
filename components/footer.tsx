@@ -65,6 +65,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/dashboard/leaderboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Leaderboard
+                </Link>
+              </li>
+              <li>
                 <Link href="/dashboard/templates" className="text-muted-foreground hover:text-foreground transition-colors">
                   Templates
                 </Link>

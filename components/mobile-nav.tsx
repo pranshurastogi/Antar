@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { BarChart3, Trophy, BookTemplate, Home } from "lucide-react"
+import { BarChart3, Trophy, Crown, Home } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 
@@ -9,7 +9,7 @@ const navItems = [
   { href: "/dashboard", icon: Home, label: "Home" },
   { href: "/dashboard/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/dashboard/achievements", icon: Trophy, label: "Achievements" },
-  { href: "/dashboard/templates", icon: BookTemplate, label: "Templates" },
+  { href: "/dashboard/leaderboard", icon: Crown, label: "Leaderboard" },
 ]
 
 export function MobileNav() {
